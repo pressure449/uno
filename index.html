@@ -53,17 +53,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .lobby-mode .lm-text small{display:block;font-size:10px;font-weight:600;color:rgba(255,255,255,.42);margin-top:2px}
 .lobby-actions{display:flex;flex-direction:column;gap:10px}
 .lobby-actions .btn-primary{width:100%}
-#topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;flex:none;gap:8px}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;flex:none;gap:6px}
 .brand{font-size:22px;font-weight:900;font-style:italic;letter-spacing:1px;color:#ffd84d;text-shadow:2px 2px 0 #b3202c,3px 3px 8px rgba(0,0,0,.5);flex:none}
 #roomBadge{font-size:10px;font-weight:800;letter-spacing:1.5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);padding:4px 10px;border-radius:12px;color:rgba(255,255,255,.7);flex:none}
 #mercyBadge{font-size:9px;font-weight:900;letter-spacing:1px;background:rgba(255,92,92,.22);border:1px solid rgba(255,92,92,.5);padding:4px 9px;border-radius:12px;color:#ff8a8a;flex:none}
-#status{font-size:12px;font-weight:600;opacity:.9;flex:1;text-align:right}
+#status{font-size:12px;font-weight:600;opacity:.9;flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#turnTimer{font-size:11px;font-weight:800;padding:4px 9px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.85);letter-spacing:.5px;flex:none;min-width:46px;text-align:center;transition:.2s;font-variant-numeric:tabular-nums}
+#turnTimer.urgent{background:rgba(255,92,92,.28);border-color:rgba(255,92,92,.7);color:#ff8a8a;animation:timerPulse .7s infinite}
+@keyframes timerPulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.08);box-shadow:0 0 14px rgba(255,92,92,.6)}
+}
 #passBtn{background:#ffd84d;color:#1a1a1a;border:none;border-radius:20px;padding:8px 18px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #b99a1e;transition:.15s;flex:none;font-family:inherit}
 #passBtn:active{transform:translateY(2px);box-shadow:0 1px 0 #b99a1e}
+#soundToggle{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#fff;font-size:14px;cursor:pointer;display:grid;place-items:center;transition:.15s;flex:none;padding:0;line-height:1}
+#soundToggle.muted{opacity:.4}
+#soundToggle:active{transform:scale(.92)}
 #opponents{display:flex;justify-content:center;gap:10px;padding:2px 10px 0;flex:none;flex-wrap:wrap}
-.opponent{background:rgba(0,0,0,.28);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:7px 11px;min-width:98px;text-align:center;transition:.35s}
-.opponent.active{border-color:#ffd84d;background:rgba(255,216,77,.16);box-shadow:0 0 22px rgba(255,216,77,.4);transform:translateY(-2px)}
+.opponent{background:rgba(0,0,0,.28);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:7px 11px;min-width:98px;text-align:center;transition:.35s;position:relative}
+.opponent.active{border-color:#ffd84d;background:rgba(255,216,77,.16);transform:translateY(-2px);animation:activeGlow 2s ease-in-out infinite}
+@keyframes activeGlow{
+  0%,100%{box-shadow:0 0 18px rgba(255,216,77,.35)}
+  50%{box-shadow:0 0 30px rgba(255,216,77,.75)}
+}
 .opponent.out{opacity:.35;filter:grayscale(.9);border-color:rgba(255,92,92,.3)}
+.opponent.penalty{animation:oppPenalty .5s ease}
+@keyframes oppPenalty{
+  0%,100%{transform:scale(1) translateX(0)}
+  20%{transform:scale(1.06) translateX(-3px)}
+  40%{transform:scale(.98) translateX(3px)}
+  60%{transform:scale(1.04) translateX(-2px)}
+  80%{transform:scale(.99) translateX(2px)}
+}
 .opp-name{font-size:11px;font-weight:700;margin-bottom:5px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
 .opp-cards{display:flex;justify-content:center;height:20px}
 .mini-back{width:14px;height:20px;border-radius:3px;background:#141414;border:1px solid rgba(255,255,255,.85);flex:none}
@@ -81,8 +102,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 #drawPile:active{transform:scale(.96)}
 .pile-label{font-size:11px;font-weight:700;opacity:.7;letter-spacing:.5px;display:flex;align-items:center;gap:6px;white-space:nowrap}
 .dot{width:12px;height:12px;border-radius:50%;display:inline-block;background:var(--red);box-shadow:0 0 8px currentColor;transition:.25s}
-
-/* ============ 卡牌基础 ============ */
 .card{width:var(--card-w);height:var(--card-h);border-radius:9px;background:#fff;padding:3px;position:relative;flex:none;box-shadow:0 3px 8px rgba(0,0,0,.45)}
 .card .face{width:100%;height:100%;border-radius:7px;position:relative;display:grid;place-items:center;overflow:hidden;background:var(--c)}
 .card .oval{position:absolute;width:165%;height:64%;background:#fff;border-radius:50%;transform:rotate(-33deg);z-index:1}
@@ -97,8 +116,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .card.back .face{--c:#141414;background:#141414}
 .card.back .oval{width:150%;height:58%;background:var(--red)}
 .card.back .label{color:#fff;font-size:calc(var(--card-h) * .19);font-style:italic;letter-spacing:-.5px;transform:rotate(-33deg);text-shadow:0 1px 3px rgba(0,0,0,.5)}
-
-/* ============ 毫不留情专属牌 · 暗黑风 ============ */
 .card.mercy{box-shadow:0 3px 10px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.05) inset}
 .card.mercy .face{background:#141414;border:2.5px solid var(--c);box-sizing:border-box}
 .card.mercy .oval{display:none}
@@ -106,75 +123,146 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .card.mercy .face.wild{border:2.5px solid transparent;background-image:linear-gradient(#141414,#141414),conic-gradient(from 45deg,var(--red) 0 25%,var(--yellow) 0 50%,var(--green) 0 75%,var(--blue) 0);background-origin:padding-box,border-box;background-clip:padding-box,border-box}
 .card.mercy .face.wild .label{color:#fff;text-shadow:0 0 14px rgba(255,255,255,.95),0 0 5px rgba(255,255,255,.7),0 2px 6px rgba(0,0,0,.95)}
 .card.mercy .label.small{font-size:calc(var(--card-h) * .22) !important;letter-spacing:-.8px}
-
+.card.just-dropped{animation:cardDrop .38s cubic-bezier(.2,1.4,.4,1)}
+@keyframes cardDrop{
+  0%{transform:scale(1.5) translateY(-40px) rotate(-8deg);opacity:0}
+  60%{transform:scale(.94) translateY(3px) rotate(2deg);opacity:1}
+  100%{transform:scale(1) translateY(0) rotate(0)}
+}
 #handArea{height:172px;flex:none;display:flex;align-items:flex-end;justify-content:flex-start;padding:0 10px 14px;overflow-x:auto;overflow-y:hidden;position:relative}
 #hand{display:flex;align-items:flex-end;padding-top:36px;margin:0 auto;flex:0 0 auto}
-
-/* ============ 手牌层级：可出牌整体提升 ============ */
 #hand .card{position:relative;z-index:1;transition:transform .18s ease,box-shadow .18s ease,z-index 0s}
 #hand .card:not(.playable):not(.selected){filter:brightness(.55) saturate(.65)}
 #hand .card.playable{cursor:pointer;z-index:10;box-shadow:0 0 0 2px rgba(255,216,77,.9),0 4px 12px rgba(0,0,0,.5)}
 #hand .card.playable:hover{transform:translateY(calc(var(--card-h) * -0.15)) scale(1.03);z-index:30}
-
-/* ============ 选中的牌：浮起到最高层 ============ */
 #hand .card.selected{
   z-index:25;
   transform:translateY(calc(var(--card-h) * -0.3)) scale(1.08);
   filter:brightness(1.12) saturate(1.15);
-  box-shadow:
-    0 0 0 3px #ffd84d,
-    0 0 26px rgba(255,216,77,.85),
-    0 10px 26px rgba(0,0,0,.6);
+  box-shadow:0 0 0 3px #ffd84d,0 0 26px rgba(255,216,77,.85),0 10px 26px rgba(0,0,0,.6);
 }
-#hand .card.selected:hover{
-  transform:translateY(calc(var(--card-h) * -0.3)) scale(1.08);
-  z-index:30;
+#hand .card.selected:hover{transform:translateY(calc(var(--card-h) * -0.3)) scale(1.08);z-index:30}
+#hand .card.newly-drawn{animation:newCardIn .8s cubic-bezier(.2,1.4,.4,1)}
+@keyframes newCardIn{
+  0%{transform:translateY(-60px) scale(1.2);opacity:0;box-shadow:0 0 0 3px #8ee6a8,0 0 30px rgba(142,230,168,.8)}
+  40%{transform:translateY(5px) scale(1.05);opacity:1;box-shadow:0 0 0 3px #8ee6a8,0 0 30px rgba(142,230,168,.8)}
+  100%{transform:translateY(0) scale(1);box-shadow:0 0 0 0 transparent}
 }
-
-/* ============ 出牌按钮 ============ */
+#hand .card.stagger-in{animation:staggerIn .55s cubic-bezier(.2,1.4,.5,1) backwards}
+@keyframes staggerIn{
+  0%{transform:translateY(-120px) rotate(-18deg) scale(.35);opacity:0}
+  55%{transform:translateY(8px) rotate(4deg) scale(1.06);opacity:1}
+  100%{transform:translateY(0) rotate(0) scale(1);opacity:1}
+}
 #playBtn{
-  position:absolute;
-  top:8px;
-  right:12px;
-  z-index:60;
-  width:60px;height:60px;
-  border:none;border-radius:50%;
+  position:absolute;top:8px;right:12px;z-index:60;
+  width:60px;height:60px;border:none;border-radius:50%;
   background:radial-gradient(circle at 30% 25%,#ffe27a,#ffd84d 55%,#e8a900);
-  color:#1a1a1a;
-  font-weight:900;font-size:14px;letter-spacing:1px;
-  cursor:pointer;
-  font-family:inherit;
-  box-shadow:
-    0 4px 0 #b99a1e,
-    0 6px 18px rgba(0,0,0,.5),
-    0 0 0 0 rgba(255,216,77,.8);
+  color:#1a1a1a;font-weight:900;font-size:14px;letter-spacing:1px;
+  cursor:pointer;font-family:inherit;
+  box-shadow:0 4px 0 #b99a1e,0 6px 18px rgba(0,0,0,.5);
   transition:transform .12s, box-shadow .12s, opacity .2s;
 }
-#playBtn:disabled{
-  opacity:.28;
-  cursor:not-allowed;
-  filter:grayscale(.55);
-  box-shadow:0 4px 0 #5a4c14, 0 2px 8px rgba(0,0,0,.5);
-}
-#playBtn:not(:disabled){
-  animation:playPulse 1.6s infinite;
-}
-#playBtn:not(:disabled):active{
-  transform:translateY(3px);
-  box-shadow:0 1px 0 #b99a1e, 0 2px 8px rgba(0,0,0,.5);
-}
-#playBtn:not(:disabled):hover{
-  transform:translateY(-2px) scale(1.04);
-}
+#playBtn:disabled{opacity:.28;cursor:not-allowed;filter:grayscale(.55);box-shadow:0 4px 0 #5a4c14,0 2px 8px rgba(0,0,0,.5);animation:none}
+#playBtn:not(:disabled){animation:playPulse 1.6s infinite}
+#playBtn:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 #b99a1e,0 2px 8px rgba(0,0,0,.5)}
+#playBtn:not(:disabled):hover{transform:translateY(-2px) scale(1.04)}
 @keyframes playPulse{
   0%,100%{box-shadow:0 4px 0 #b99a1e,0 6px 18px rgba(0,0,0,.5),0 0 0 0 rgba(255,216,77,.8)}
   50%{box-shadow:0 4px 0 #b99a1e,0 6px 18px rgba(0,0,0,.5),0 0 0 14px rgba(255,216,77,0)}
 }
-
 #outHint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);z-index:50;pointer-events:none;font-size:18px;font-weight:900;color:#ff8a8a;letter-spacing:3px;text-shadow:0 2px 12px rgba(255,92,92,.6)}
+body.shake{animation:screenShake .5s ease}
+@keyframes screenShake{
+  0%,100%{transform:translate(0,0)}
+  10%{transform:translate(-6px,-4px)}
+  20%{transform:translate(6px,4px)}
+  30%{transform:translate(-5px,3px)}
+  40%{transform:translate(5px,-3px)}
+  50%{transform:translate(-4px,3px)}
+  60%{transform:translate(4px,-3px)}
+  70%{transform:translate(-3px,2px)}
+  80%{transform:translate(3px,-2px)}
+  90%{transform:translate(-1px,1px)}
+}
+body.shake-red{animation:screenShakeRed .6s ease}
+@keyframes screenShakeRed{
+  0%,100%{transform:translate(0,0);filter:none}
+  10%{transform:translate(-8px,-5px);filter:brightness(1.15)}
+  20%{transform:translate(8px,5px);filter:brightness(1.15)}
+  30%{transform:translate(-6px,4px);filter:brightness(1.1) hue-rotate(-15deg)}
+  40%{transform:translate(6px,-4px);filter:brightness(1.1) hue-rotate(-15deg)}
+  60%{transform:translate(-4px,3px)}
+  80%{transform:translate(4px,-3px)}
+}
+.float-text{
+  position:fixed;pointer-events:none;font-weight:900;font-size:34px;
+  z-index:999;letter-spacing:1px;
+  text-shadow:0 2px 8px rgba(0,0,0,.9),0 0 20px currentColor;
+  transform:translate(-50%,-50%);
+  animation:floatUp 1.3s cubic-bezier(.2,.8,.2,1) forwards;
+}
+@keyframes floatUp{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
+  15%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}
+  30%{transform:translate(-50%,-60%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-160%) scale(.9)}
+}
+#startOverlay{
+  position:fixed;inset:0;z-index:400;
+  background:radial-gradient(ellipse at 50% 45%,rgba(20,60,40,.98),rgba(0,0,0,.98) 75%);
+  backdrop-filter:blur(14px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  opacity:1;transition:opacity .32s ease;
+}
+#startOverlay.out{opacity:0}
+#startCountdown{
+  font-size:150px;font-weight:900;font-style:italic;line-height:1;
+  color:#ffd84d;
+  text-shadow:
+    0 8px 40px rgba(255,216,77,.65),
+    0 0 80px rgba(255,216,77,.45),
+    4px 4px 0 #b3202c,
+    8px 8px 24px rgba(0,0,0,.7);
+  letter-spacing:-4px;
+  will-change:transform,opacity;
+}
+#startCountdown.go{
+  color:#8ee6a8;
+  text-shadow:
+    0 8px 40px rgba(142,230,168,.85),
+    0 0 90px rgba(142,230,168,.6),
+    4px 4px 0 #1a5e30,
+    8px 8px 24px rgba(0,0,0,.7);
+  font-size:96px;
+  letter-spacing:4px;
+}
+#startCountdown.tick{animation:countdownTick .5s cubic-bezier(.2,1.4,.5,1)}
+@keyframes countdownTick{
+  0%{transform:scale(.25);opacity:0}
+  45%{transform:scale(1.22);opacity:1}
+  70%{transform:scale(.96)}
+  100%{transform:scale(1);opacity:1}
+}
+#startSub{
+  font-size:12px;letter-spacing:8px;font-weight:800;
+  color:rgba(255,255,255,.42);
+  animation:subFadeIn .6s ease;
+}
+@keyframes subFadeIn{from{opacity:0;letter-spacing:16px}to{opacity:1;letter-spacing:8px}}
+#screenGame.appear{animation:screenAppear .45s cubic-bezier(.2,.8,.4,1)}
+@keyframes screenAppear{
+  from{opacity:0;transform:scale(.985)}
+  to{opacity:1;transform:scale(1)}
+}
 #toast{position:fixed;left:50%;bottom:186px;transform:translate(-50%,12px);background:rgba(0,0,0,.84);color:#fff;padding:10px 22px;border-radius:22px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.28s;z-index:200;white-space:nowrap;border:1px solid rgba(255,255,255,.12);max-width:88vw;overflow:hidden;text-overflow:ellipsis}
 #toast.show{opacity:1;transform:translate(-50%,0)}
-#toast.mercy{background:rgba(120,10,20,.9);border-color:rgba(255,92,92,.4)}
+#toast.mercy{background:rgba(120,10,20,.9);border-color:rgba(255,92,92,.4);animation:toastMercy .4s ease}
+@keyframes toastMercy{
+  0%{transform:translate(-50%,0) scale(.9)}
+  50%{transform:translate(-50%,0) scale(1.05)}
+  100%{transform:translate(-50%,0) scale(1)}
+}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:300;animation:fadeIn .25s}
 @keyframes fadeIn{from{opacity:0}}
 .panel{background:linear-gradient(160deg,#1e2a24,#0d1a13);border:2px solid rgba(255,216,77,.35);border-radius:20px;padding:30px 34px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:pop .3s cubic-bezier(.2,1.4,.5,1);max-width:88vw}
@@ -187,6 +275,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 #gameOver .panel-title{font-size:26px}
 #gameOver .sub{font-size:13px;opacity:.7;margin-bottom:22px}
 .panel-actions{display:flex;flex-direction:column;gap:10px}
+.panel-hint{font-size:11px;color:rgba(255,255,255,.35);font-weight:600;margin-top:4px}
 #connBadge{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#ff9a9a;font-size:11px;font-weight:800;padding:6px 16px;border-radius:14px;z-index:500;letter-spacing:1px;transition:.3s}
 #connBadge.ok{opacity:0;pointer-events:none}
 @media (max-width:520px){
@@ -200,12 +289,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   .home-card{padding:28px 22px 22px}
   .brand-big{font-size:44px}
   #playBtn{width:52px;height:52px;font-size:12px}
+  .float-text{font-size:26px}
+  #startCountdown{font-size:110px}
+  #startCountdown.go{font-size:72px}
+  #turnTimer{font-size:10px;padding:3px 7px;min-width:40px}
 }
 </style>
 </head>
 <body>
 
 <div id="connBadge">连接中…</div>
+
+<div id="startOverlay" class="hidden">
+  <div id="startCountdown">3</div>
+  <div id="startSub">准 备 开 战</div>
+</div>
+
 <div id="app">
   <div id="screenHome" class="screen">
     <div class="home-card">
@@ -248,6 +347,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
       <div id="roomBadge">房间 ------</div>
       <div id="mercyBadge" class="hidden">毫不留情</div>
       <div id="status">准备中</div>
+      <div id="turnTimer" class="hidden">30s</div>
+      <button id="soundToggle" title="音效开关">🔊</button>
       <button id="passBtn" class="hidden">过 牌</button>
     </div>
     <div id="opponents"></div>
@@ -286,9 +387,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
     <div class="panel-title" id="goTitle">游戏结束</div>
     <div class="sub" id="goSub"></div>
     <div class="panel-actions">
-      <button id="againBtn" class="btn-primary hidden">再来一局</button>
+      <button id="returnRoomBtn" class="btn-primary hidden">返回房间</button>
       <button id="backHomeBtn" class="btn-ghost">返回首页</button>
     </div>
+    <div class="panel-hint hidden" id="waitHostHint">等待房主返回房间…</div>
   </div>
 </div>
 
@@ -299,16 +401,77 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 const COLORS=['red','yellow','green','blue'];
 const COLOR_NAME={red:'红',yellow:'黄',green:'绿',blue:'蓝'};
 const BROKER='wss://broker.emqx.io:8084/mqtt';
-const PREFIX='uno/v6/';
+const PREFIX='uno/v8/';
 const BOT_NAMES=['小蓝','小绿','小黄'];
 const MERCY_LIMIT=25;
 const MERCY_VALUES=['wild6','wild10','reverse_draw4','skip_everyone','discard_all'];
+const TURN_TIME_MS=30000;   // 每回合 30 秒
 
 const G={pid:'p'+Math.random().toString(36).slice(2,9),name:'',room:'',isHost:false,pub:null,myHand:[],joined:false,screen:'home',selectedId:null};
-const Host={active:false,players:[],deck:[],discard:[],currentIdx:0,dir:1,currentColor:null,started:false,winner:null,drawnBy:null,lobbyPlayers:[],mercyMode:false};
+const Host={active:false,players:[],deck:[],discard:[],currentIdx:0,dir:1,currentColor:null,started:false,winner:null,drawnBy:null,lobbyPlayers:[],mercyMode:false,lastAction:null,turnStartedAt:0,turnTimer:null};
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 const $=id=>document.getElementById(id);
+
+let audioCtx=null;
+let soundEnabled=localStorage.getItem('uno_sound')!=='off';
+function initAudio(){
+  if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+  if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+  return audioCtx;
+}
+function tone(freq,dur,opts){
+  if(!soundEnabled)return;
+  const ctx=initAudio();if(!ctx)return;
+  opts=opts||{};
+  const t0=ctx.currentTime+(opts.delay||0);
+  const osc=ctx.createOscillator();
+  const g=ctx.createGain();
+  osc.type=opts.type||'sine';
+  osc.frequency.setValueAtTime(freq,t0);
+  if(opts.to)osc.frequency.exponentialRampToValueAtTime(opts.to,t0+dur);
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(opts.vol||0.15,t0+0.01);
+  g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  osc.connect(g).connect(ctx.destination);
+  osc.start(t0);osc.stop(t0+dur+0.02);
+}
+const SFX={
+  play(){tone(700,0.08,{type:'triangle',vol:0.12});tone(950,0.1,{type:'triangle',vol:0.08,delay:0.05})},
+  draw(){tone(500,0.1,{type:'sine',vol:0.1,to:380})},
+  penalty(){tone(220,0.15,{type:'sawtooth',vol:0.14});tone(160,0.24,{type:'sawtooth',vol:0.12,delay:0.08})},
+  uno(){[523,659,784].forEach((f,i)=>tone(f,0.12,{type:'square',vol:0.13,delay:i*0.08}))},
+  win(){[523,659,784,1047].forEach((f,i)=>tone(f,0.18,{type:'triangle',vol:0.16,delay:i*0.1}))},
+  lose(){[440,370,294].forEach((f,i)=>tone(f,0.22,{type:'sine',vol:0.12,delay:i*0.13}))},
+  click(){tone(660,0.04,{type:'square',vol:0.06})},
+  pop(){tone(880,0.05,{type:'sine',vol:0.08});tone(1200,0.06,{type:'sine',vol:0.06,delay:0.04})},
+  tickHi(){tone(1200,0.14,{type:'triangle',vol:0.16})},
+  tickLo(){tone(520,0.1,{type:'triangle',vol:0.12})},
+  timeout(){tone(400,0.15,{type:'sawtooth',vol:0.14,to:250});tone(300,0.2,{type:'sawtooth',vol:0.12,delay:0.12})}
+};
+
+function shakeScreen(red){
+  const cls=red?'shake-red':'shake';
+  document.body.classList.add(cls);
+  setTimeout(()=>document.body.classList.remove(cls),red?600:500);
+  if(navigator.vibrate){try{navigator.vibrate(red?[60,30,60]:40)}catch(e){}}
+}
+function showFloatText(text,color,x,y,big){
+  const el=document.createElement('div');
+  el.className='float-text';
+  el.textContent=text;
+  el.style.color=color||'#ffd84d';
+  el.style.left=x+'px';
+  el.style.top=y+'px';
+  if(big)el.style.fontSize='42px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1400);
+}
+function elementCenter(el){
+  const r=el.getBoundingClientRect();
+  return{x:r.left+r.width/2,y:r.top+r.height/2};
+}
+
 let toastTimer;
 function toast(msg,mercy){const el=$('toast');el.textContent=msg;el.classList.toggle('mercy',!!mercy);el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2200)}
 function randomRoom(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
@@ -358,19 +521,11 @@ function buildDeck(mercy){
   }
   return d;
 }
-
 function cardLabel(card){
   switch(card.value){
-    case 'skip':return '⊘';
-    case 'reverse':return '⇄';
-    case 'draw2':return '+2';
-    case 'wild':return '';
-    case 'wild4':return '+4';
-    case 'wild6':return '+6';
-    case 'wild10':return '+10';
-    case 'reverse_draw4':return '⇄+4';
-    case 'skip_everyone':return '⊘⊘';
-    case 'discard_all':return '✕';
+    case 'skip':return '⊘';case 'reverse':return '⇄';case 'draw2':return '+2';
+    case 'wild':return '';case 'wild4':return '+4';case 'wild6':return '+6';case 'wild10':return '+10';
+    case 'reverse_draw4':return '⇄+4';case 'skip_everyone':return '⊘⊘';case 'discard_all':return '✕';
     default:return card.value;
   }
 }
@@ -379,10 +534,9 @@ function cardDesc(card){
   if(card.color==='wild')return n[card.value]||card.value;
   return COLOR_NAME[card.color]+(n[card.value]||card.value);
 }
-
 function createCardEl(card){
   const el=document.createElement('div');el.className='card';
-  if(MERCY_VALUES.includes(card.value)) el.classList.add('mercy');
+  if(MERCY_VALUES.includes(card.value))el.classList.add('mercy');
   const face=document.createElement('div');face.className='face '+card.color;
   if(card.color!=='wild'){const o=document.createElement('div');o.className='oval';face.appendChild(o)}
   const l=document.createElement('span');l.className='label';
@@ -399,39 +553,61 @@ function switchScreen(name){
   $('screenHome').classList.toggle('hidden',name!=='home');
   $('screenLobby').classList.toggle('hidden',name!=='lobby');
   $('screenGame').classList.toggle('hidden',name!=='game');
-  if(name==='game')scheduleLayout();
+  if(name==='game'){
+    const el=$('screenGame');
+    el.classList.remove('appear');
+    void el.offsetWidth;
+    el.classList.add('appear');
+    scheduleLayout();
+  }
 }
 
 function getName(){const v=$('nameInput').value.trim();return v||('玩家'+G.pid.slice(1,4).toUpperCase())}
 function setHomeTip(msg,ok){const el=$('homeTip');el.textContent=msg;el.style.color=ok?'#8ee6a8':'#ff9a9a'}
 
 $('createBtn').addEventListener('click',async()=>{
+  initAudio();
   G.name=getName();
   try{setHomeTip('正在连接服务器…',true);await mqttConnect()}catch{setHomeTip('无法连接 MQTT 服务器，请刷新重试');return}
   setHomeTip('');
   G.room=randomRoom();G.isHost=true;G.joined=true;G.selectedId=null;
   Host.active=true;
   Host.players=[{pid:G.pid,name:G.name,hand:[],isBot:false,out:false}];
-  Host.started=false;Host.winner=null;Host.mercyMode=false;
+  Host.started=false;Host.winner=null;Host.mercyMode=false;Host.lastAction=null;
+  Host.turnStartedAt=0;Host.turnTimer=null;
+  resetTransitionFlags();
   subscribeAsHost();enterLobby();hostBroadcastLobby();
   toast('房间已创建：'+G.room);
 });
 
 $('joinBtn').addEventListener('click',async()=>{
+  initAudio();
   const room=$('roomInput').value.trim().toUpperCase();
   if(room.length!==6){setHomeTip('请输入 6 位房间码');return}
   G.name=getName();
   try{setHomeTip('正在连接服务器…',true);await mqttConnect()}catch{setHomeTip('无法连接 MQTT 服务器，请刷新重试');return}
   setHomeTip('');
   G.room=room;G.isHost=false;G.joined=false;G.selectedId=null;
+  resetTransitionFlags();
   subscribeAsClient();enterLobby();
   $('lobbyRoom').textContent=room;
   $('lobbyHint').textContent='正在加入房间…';
   mqttPub(PREFIX+room+'/action',{type:'join',pid:G.pid,name:G.name});
   setTimeout(()=>{if(!G.joined&&G.screen==='lobby'&&!G.isHost){$('lobbyHint').textContent='加入失败：房间不存在或房主已离线';$('lobbyHint').style.color='#ff9a9a'}},6000);
 });
-
 $('roomInput').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'')});
+
+function updateSoundBtn(){
+  const b=$('soundToggle');
+  b.textContent=soundEnabled?'🔊':'🔇';
+  b.classList.toggle('muted',!soundEnabled);
+}
+$('soundToggle').addEventListener('click',()=>{
+  soundEnabled=!soundEnabled;
+  localStorage.setItem('uno_sound',soundEnabled?'on':'off');
+  updateSoundBtn();
+  if(soundEnabled){initAudio();SFX.click()}
+});
 
 function subscribeAsHost(){mqttSub(PREFIX+G.room+'/action',hostOnAction)}
 function subscribeAsClient(){
@@ -466,32 +642,134 @@ function renderLobby(){
   }
 }
 
-$('mercyToggle').addEventListener('change',e=>{if(!G.isHost)return;Host.mercyMode=e.target.checked;hostBroadcastLobby()});
-
+$('mercyToggle').addEventListener('change',e=>{
+  if(!G.isHost)return;
+  Host.mercyMode=e.target.checked;
+  SFX.click();
+  hostBroadcastLobby();
+});
 $('addBotBtn').addEventListener('click',()=>{
   if(!G.isHost||Host.players.length>=4)return;
+  SFX.pop();
   const used=Host.players.filter(p=>p.isBot).length;
   Host.players.push({pid:'bot_'+Math.random().toString(36).slice(2,7),name:BOT_NAMES[used]||('电脑'+(used+1)),hand:[],isBot:true,out:false});
   hostBroadcastLobby();renderLobby();
 });
-
 $('startBtn').addEventListener('click',()=>{
   if(!G.isHost)return;
   if(Host.players.length<2){toast('至少需要 2 位玩家');return}
+  SFX.pop();
   hostStartGame();
 });
-
 $('leaveBtn').addEventListener('click',leaveRoom);
 
 function leaveRoom(){
   if(G.room&&!G.isHost&&G.joined)mqttPub(PREFIX+G.room+'/action',{type:'leave',pid:G.pid});
+  if(G.isHost)hostClearTurnTimer();
   G.room='';G.isHost=false;G.joined=false;G.pub=null;G.myHand=[];G.selectedId=null;
-  Host.active=false;Host.players=[];Host.started=false;Host.winner=null;
+  Host.active=false;Host.players=[];Host.started=false;Host.winner=null;Host.lastAction=null;
+  Host.turnStartedAt=0;Host.turnTimer=null;
+  resetTransitionFlags();
   $('gameOver').classList.add('hidden');
   $('colorPicker').classList.add('hidden');
+  $('startOverlay').classList.add('hidden');
+  $('startOverlay').classList.remove('out');
+  $('turnTimer').classList.add('hidden');
   switchScreen('home');setHomeTip('');
 }
 $('backHomeBtn').addEventListener('click',leaveRoom);
+
+let _prevStarted=false;
+let _inCountdown=false;
+let _staggerHand=false;
+function resetTransitionFlags(){_prevStarted=false;_inCountdown=false;_staggerHand=false}
+
+function playStartTransition(onDone){
+  const overlay=$('startOverlay');
+  const num=$('startCountdown');
+  overlay.classList.remove('hidden','out');
+  let count=3;
+  const step=()=>{
+    if(count>0){
+      num.textContent=String(count);
+      num.classList.remove('go','tick');
+      void num.offsetWidth;
+      num.classList.add('tick');
+      SFX.tickHi();
+      count--;
+      setTimeout(step,500);
+    }else{
+      num.textContent='开始！';
+      num.classList.remove('tick');
+      num.classList.add('go');
+      void num.offsetWidth;
+      num.classList.add('tick');
+      SFX.uno();
+      setTimeout(()=>{
+        onDone&&onDone();
+        overlay.classList.add('out');
+        setTimeout(()=>{
+          overlay.classList.add('hidden');
+          overlay.classList.remove('out');
+        },340);
+      },400);
+    }
+  };
+  step();
+}
+
+function enterGameScreen(pub){
+  if(G.screen!=='game'){
+    switchScreen('game');
+    $('roomBadge').textContent='房间 '+G.room;
+    lastActionTs=0;lastTopCardId=null;lastHandCount=0;
+  }
+  renderGame();
+  if(pub&&pub.winner)showGameOver(pub);
+}
+
+function handleGameStart(pub){
+  if(G.screen==='game'){
+    renderGame();
+    if(pub.winner)showGameOver(pub);
+    return;
+  }
+  if(_inCountdown)return;
+  const isFreshStart=!_prevStarted&&pub.lastAction&&pub.lastAction.type==='start';
+  _prevStarted=true;
+  if(isFreshStart){
+    _inCountdown=true;
+    playStartTransition(()=>{
+      _inCountdown=false;
+      _staggerHand=true;
+      enterGameScreen(pub);
+    });
+  }else{
+    enterGameScreen(pub);
+  }
+}
+
+/* ============ 倒计时显示 ============ */
+let _turnRemainMs=0;
+let _turnReceivedAt=0;
+function updateTurnTimerDisplay(){
+  const el=$('turnTimer');
+  if(!G.pub||!G.pub.started||G.pub.winner||_turnRemainMs<=0){
+    el.classList.add('hidden');
+    return;
+  }
+  const elapsed=Date.now()-_turnReceivedAt;
+  const remain=Math.max(0,_turnRemainMs-elapsed);
+  const secs=Math.ceil(remain/1000);
+  el.textContent=secs+'s';
+  el.classList.remove('hidden');
+  el.classList.toggle('urgent',remain<=5000);
+}
+setInterval(updateTurnTimerDisplay,200);
+
+let lastActionTs=0;
+let lastTopCardId=null;
+let lastHandCount=0;
 
 function onStateMessage(msg){
   if(!msg||!msg.type)return;
@@ -507,17 +785,90 @@ function onStateMessage(msg){
     const prevCurrent=G.pub&&G.pub.currentPid;
     G.pub=msg;
     if(prevCurrent!==msg.currentPid)G.selectedId=null;
-    if(msg.started){
-      if(G.screen!=='game'){switchScreen('game');$('roomBadge').textContent='房间 '+G.room}
-      renderGame();
-      if(msg.winner)showGameOver(msg);
+
+    // 更新回合倒计时基准
+    if(msg.started&&!msg.winner&&typeof msg.turnRemainMs==='number'){
+      _turnRemainMs=msg.turnRemainMs;
+      _turnReceivedAt=Date.now();
     }else{
+      _turnRemainMs=0;
+    }
+
+    if(msg.started){
+      if(G.screen==='game'&&msg.lastAction&&msg.lastAction.ts>lastActionTs){
+        lastActionTs=msg.lastAction.ts;
+        handleActionFeedback(msg.lastAction,msg,true);
+      }
+      handleGameStart(msg);
+    }else{
+      _prevStarted=false;_inCountdown=false;
+      _turnRemainMs=0;
       if(G.screen==='game')switchScreen('lobby');
+      $('gameOver').classList.add('hidden');
+      $('colorPicker').classList.add('hidden');
+      $('startOverlay').classList.add('hidden');
+      $('startOverlay').classList.remove('out');
+      $('turnTimer').classList.add('hidden');
+      G.selectedId=null;G.myHand=[];
       renderLobby();
     }
     return;
   }
   if(msg.type==='toast'){toast(msg.msg,msg.mercy);return}
+}
+
+function handleActionFeedback(action,pub,prevStarted){
+  if(!prevStarted&&action.type==='start')return;
+  switch(action.type){
+    case 'play':SFX.play();break;
+    case 'draw':SFX.draw();break;
+    case 'timeout':{
+      SFX.timeout();
+      shakeScreen(false);
+      const target=document.querySelector(`.opponent[data-pid="${action.pid}"]`);
+      if(target){
+        const c=elementCenter(target);
+        showFloatText('⏰ 超时','#ffb06a',c.x,c.y,true);
+      }else if(action.pid===G.pid){
+        showFloatText('⏰ 超时','#ffb06a',window.innerWidth/2,window.innerHeight*0.5,true);
+        shakeScreen(true);
+      }
+      break;
+    }
+    case 'penalty':{
+      SFX.penalty();
+      const target=document.querySelector(`.opponent[data-pid="${action.targetPid}"]`);
+      if(target){
+        target.classList.add('penalty');
+        setTimeout(()=>target.classList.remove('penalty'),550);
+        const c=elementCenter(target);
+        const color=action.value>=6?'#ff5c5c':'#ffb06a';
+        showFloatText('+'+action.value,color,c.x,c.y,action.value>=6);
+      }
+      if(action.targetPid===G.pid)shakeScreen(action.value>=6);
+      break;
+    }
+    case 'uno':{
+      SFX.uno();
+      if(action.pid===G.pid)showFloatText('UNO!','#ff5c5c',window.innerWidth/2,window.innerHeight*0.35,true);
+      break;
+    }
+    case 'out':{
+      SFX.penalty();
+      shakeScreen(true);
+      const target=document.querySelector(`.opponent[data-pid="${action.pid}"]`);
+      if(target){
+        const c=elementCenter(target);
+        showFloatText('OUT','#ff8a8a',c.x,c.y,true);
+      }
+      break;
+    }
+    case 'win':{
+      if(action.pid===G.pid)SFX.win();
+      else SFX.lose();
+      break;
+    }
+  }
 }
 
 function hostBroadcastLobby(){
@@ -531,7 +882,17 @@ function hostBroadcast(){
   if(!G.isHost||!G.room)return;
   const top=Host.discard[Host.discard.length-1]||null;
   const players=Host.players.map(p=>({pid:p.pid,name:p.name,isBot:!!p.isBot,count:p.hand.length,out:!!p.out}));
-  const pub={type:'state',started:Host.started,players,currentPid:(Host.started&&!Host.winner)?Host.players[Host.currentIdx].pid:null,dir:Host.dir,topCard:top,currentColor:Host.currentColor,deckCount:Host.deck.length,drawnPid:Host.drawnBy,winner:Host.winner,mercyMode:!!Host.mercyMode};
+  const turnRemainMs=(Host.started&&!Host.winner)
+    ? Math.max(0,TURN_TIME_MS-(Date.now()-Host.turnStartedAt))
+    : null;
+  const pub={
+    type:'state',started:Host.started,players,
+    currentPid:(Host.started&&!Host.winner)?Host.players[Host.currentIdx].pid:null,
+    dir:Host.dir,topCard:top,currentColor:Host.currentColor,
+    deckCount:Host.deck.length,drawnPid:Host.drawnBy,winner:Host.winner,
+    mercyMode:!!Host.mercyMode,lastAction:Host.lastAction,
+    turnRemainMs
+  };
   mqttPub(PREFIX+G.room+'/state',pub);
   for(const p of Host.players){
     if(p.isBot)continue;
@@ -541,10 +902,13 @@ function hostBroadcast(){
   const me=Host.players.find(p=>p.pid===G.pid);
   if(me)G.myHand=me.hand;
   G.pub=pub;
+
   if(Host.started){
-    if(G.screen!=='game'){switchScreen('game');$('roomBadge').textContent='房间 '+G.room}
-    renderGame();
-    if(Host.winner)showGameOver(pub);
+    if(G.screen==='game'&&Host.lastAction&&Host.lastAction.ts>lastActionTs){
+      lastActionTs=Host.lastAction.ts;
+      handleActionFeedback(Host.lastAction,pub,true);
+    }
+    handleGameStart(pub);
   }
 }
 
@@ -554,14 +918,31 @@ function hostEvent(msg,mercy){
   toast(msg,mercy);
 }
 
-function wrapIdx(i){const n=Host.players.length;return((i%n)+n)%n}
+/* ============ 回合计时器（房主） ============ */
+function hostStartTurnTimer(){
+  hostClearTurnTimer();
+  Host.turnStartedAt=Date.now();
+  Host.turnTimer=setTimeout(hostHandleTurnTimeout,TURN_TIME_MS);
+}
+function hostClearTurnTimer(){
+  if(Host.turnTimer){clearTimeout(Host.turnTimer);Host.turnTimer=null}
+}
+function hostHandleTurnTimeout(){
+  Host.turnTimer=null;
+  if(!Host.started||Host.winner)return;
+  const cur=Host.players[Host.currentIdx];
+  if(!cur||cur.out)return;
+  Host.lastAction={ts:Date.now(),type:'timeout',pid:cur.pid};
+  hostEvent(`⏰ ${cur.name} 超时，自动过牌`);
+  hostAdvance(0);
+}
 
+function wrapIdx(i){const n=Host.players.length;return((i%n)+n)%n}
 function findNextAlive(startIdx,direction){
   let idx=startIdx;let guard=0;
   do{idx=wrapIdx(idx+direction);guard++}while(Host.players[idx].out&&guard<100);
   return idx;
 }
-
 function hostCheckMercyAll(){
   if(!Host.mercyMode)return false;
   let any=false;
@@ -569,6 +950,7 @@ function hostCheckMercyAll(){
     if(p.out)continue;
     if(p.hand.length>=MERCY_LIMIT){
       p.out=true;any=true;
+      Host.lastAction={ts:Date.now(),type:'out',pid:p.pid};
       hostEvent(`💀 ${p.name} 手牌达 ${MERCY_LIMIT} 张，出局！`,true);
     }
   }
@@ -576,6 +958,7 @@ function hostCheckMercyAll(){
 }
 
 function hostStartGame(){
+  hostClearTurnTimer();
   Host.deck=shuffle(buildDeck(Host.mercyMode));
   Host.discard=[];Host.dir=1;Host.currentIdx=0;Host.winner=null;Host.drawnBy=null;
   for(const p of Host.players){p.hand=[];p.out=false}
@@ -587,8 +970,9 @@ function hostStartGame(){
     Host.discard.push(c);Host.currentColor=c.color;break;
   }
   Host.started=true;
+  Host.lastAction={ts:Date.now(),type:'start'};
+  hostStartTurnTimer();
   hostBroadcast();
-  hostEvent('游戏开始！'+(Host.mercyMode?'【毫不留情模式】':''));
   hostMaybeBot();
 }
 
@@ -600,7 +984,6 @@ function hostIsPlayable(card){
   if(top&&top.color!=='wild'&&card.value===top.value)return true;
   return false;
 }
-
 function hostDrawTo(player,n){
   for(let i=0;i<n;i++){
     if(Host.deck.length===0){
@@ -613,13 +996,14 @@ function hostDrawTo(player,n){
     player.hand.push(Host.deck.pop());
   }
 }
-
 function hostAdvance(skip=0){
   if(!Host.started||Host.winner)return;
+  hostClearTurnTimer();
   hostCheckMercyAll();
   const alive=Host.players.filter(p=>!p.out);
   if(alive.length<=1){
     Host.winner=alive[0]?alive[0].pid:null;
+    if(Host.winner)Host.lastAction={ts:Date.now(),type:'win',pid:Host.winner};
     hostBroadcast();
     if(Host.winner){const w=Host.players.find(p=>p.pid===Host.winner);hostEvent(`🏆 ${w.name} 获胜！`)}
     return;
@@ -629,6 +1013,7 @@ function hostAdvance(skip=0){
   for(let i=0;i<steps;i++)idx=findNextAlive(idx,Host.dir);
   Host.currentIdx=idx;
   Host.drawnBy=null;
+  hostStartTurnTimer();
   hostBroadcast();
   hostMaybeBot();
 }
@@ -646,6 +1031,7 @@ function hostHandlePlay(pid,cardId,color){
   Host.discard.push(card);
   Host.currentColor=card.color==='wild'?(COLORS.includes(color)?color:'red'):card.color;
   Host.drawnBy=null;
+  Host.lastAction={ts:Date.now(),type:'play',pid,card};
 
   let dAllMsg='';
   if(card.value==='discard_all'){
@@ -662,6 +1048,8 @@ function hostHandlePlay(pid,cardId,color){
 
   if(cur.hand.length===0){
     Host.winner=cur.pid;
+    Host.lastAction={ts:Date.now(),type:'win',pid:cur.pid};
+    hostClearTurnTimer();
     hostBroadcast();
     hostEvent(`🏆 ${cur.name} 获胜！`);
     return;
@@ -680,6 +1068,7 @@ function hostHandlePlay(pid,cardId,color){
     const vi=findNextAlive(Host.currentIdx,Host.dir);
     hostDrawTo(Host.players[vi],n);
     skip=1;
+    Host.lastAction={ts:Date.now(),type:'penalty',pid,targetPid:Host.players[vi].pid,value:n};
     hostEvent(`💥 ${Host.players[vi].name} 摸 ${n} 张并跳过`,true);
     hostCheckMercyAll();
   }
@@ -688,6 +1077,7 @@ function hostHandlePlay(pid,cardId,color){
     const vi=findNextAlive(Host.currentIdx,Host.dir);
     hostDrawTo(Host.players[vi],4);
     skip=1;
+    Host.lastAction={ts:Date.now(),type:'penalty',pid,targetPid:Host.players[vi].pid,value:4};
     hostEvent(`💥 方向反转，${Host.players[vi].name} 摸 4 张并跳过`,true);
     hostCheckMercyAll();
   }
@@ -695,10 +1085,12 @@ function hostHandlePlay(pid,cardId,color){
     skip=Math.max(0,aliveCount-1);
   }
 
-  const parts=[];
-  if(dAllMsg)parts.push(dAllMsg);
-  if(cur.hand.length===1)parts.push(`${cur.name}：UNO！`);
-  if(parts.length)hostEvent(parts.join(' · '));
+  if(cur.hand.length===1){
+    if(Host.lastAction.type!=='penalty')Host.lastAction={ts:Date.now(),type:'uno',pid};
+    hostEvent(`${cur.name}：UNO！`);
+  }else if(dAllMsg){
+    hostEvent(dAllMsg);
+  }
 
   hostBroadcast();
   setTimeout(()=>hostAdvance(skip),380);
@@ -711,6 +1103,7 @@ function hostHandleDraw(pid){
   if(Host.drawnBy===pid)return;
   hostDrawTo(cur,1);
   Host.drawnBy=pid;
+  Host.lastAction={ts:Date.now(),type:'draw',pid};
   hostCheckMercyAll();
   hostBroadcast();
   if(cur.out){
@@ -723,7 +1116,6 @@ function hostHandleDraw(pid){
     setTimeout(()=>{if(!Host.winner&&Host.drawnBy===pid)hostAdvance(0)},800);
   }
 }
-
 function hostHandlePass(pid){
   if(!Host.started||Host.winner)return;
   const cur=Host.players[Host.currentIdx];
@@ -731,20 +1123,14 @@ function hostHandlePass(pid){
   if(Host.drawnBy!==pid)return;
   hostAdvance(0);
 }
-
 function hostScoreCard(c){
   if(c.color==='wild')return c.value==='wild10'?3:c.value==='wild6'?4:c.value==='wild4'?5:10;
   switch(c.value){
-    case 'draw2':return 100;
-    case 'skip':return 96;
-    case 'reverse':return 92;
-    case 'reverse_draw4':return 98;
-    case 'skip_everyone':return 94;
-    case 'discard_all':return 88;
+    case 'draw2':return 100;case 'skip':return 96;case 'reverse':return 92;
+    case 'reverse_draw4':return 98;case 'skip_everyone':return 94;case 'discard_all':return 88;
     default:return 50+(parseInt(c.value,10)||0);
   }
 }
-
 function hostBestColor(player){
   const cnt={red:0,yellow:0,green:0,blue:0};
   for(const c of player.hand)if(c.color!=='wild')cnt[c.color]++;
@@ -752,7 +1138,6 @@ function hostBestColor(player){
   for(const c of COLORS)if(cnt[c]>max){max=cnt[c];best=c}
   return best;
 }
-
 function hostMaybeBot(){
   if(!Host.started||Host.winner)return;
   const cur=Host.players[Host.currentIdx];
@@ -763,13 +1148,13 @@ function hostMaybeBot(){
     hostBotTurn();
   },850);
 }
-
 function hostBotTurn(){
   const cur=Host.players[Host.currentIdx];
   if(!cur||!cur.isBot||cur.out)return;
   const playable=cur.hand.filter(hostIsPlayable);
   if(playable.length===0){
     hostDrawTo(cur,1);
+    Host.lastAction={ts:Date.now(),type:'draw',pid:cur.pid};
     hostCheckMercyAll();
     hostBroadcast();
     if(cur.out){
@@ -797,6 +1182,43 @@ function hostBotTurn(){
   },420);
 }
 
+function hostReturnToLobby(){
+  if(!G.isHost||!G.room)return;
+  hostClearTurnTimer();
+  Host.started=false;
+  Host.winner=null;
+  Host.deck=[];Host.discard=[];
+  Host.currentIdx=0;Host.dir=1;Host.currentColor=null;
+  Host.drawnBy=null;Host.lastAction=null;
+  Host.turnStartedAt=0;
+  for(const p of Host.players){p.hand=[];p.out=false}
+
+  G.selectedId=null;G.myHand=[];G.pub=null;
+  resetTransitionFlags();
+  lastActionTs=0;lastTopCardId=null;lastHandCount=0;
+  _turnRemainMs=0;
+  $('gameOver').classList.add('hidden');
+  $('colorPicker').classList.add('hidden');
+  $('startOverlay').classList.add('hidden');
+  $('startOverlay').classList.remove('out');
+  $('turnTimer').classList.add('hidden');
+
+  const lobbyPlayers=Host.players.map((p,i)=>({pid:p.pid,name:p.name,isBot:!!p.isBot,host:i===0}));
+  mqttPub(PREFIX+G.room+'/state',{type:'lobby',players:lobbyPlayers,mercyMode:!!Host.mercyMode});
+  mqttPub(PREFIX+G.room+'/state',{
+    type:'state',started:false,
+    players:Host.players.map(p=>({pid:p.pid,name:p.name,isBot:!!p.isBot,count:0,out:false})),
+    currentPid:null,dir:1,topCard:null,currentColor:null,
+    deckCount:0,drawnPid:null,winner:null,
+    mercyMode:!!Host.mercyMode,lastAction:null,turnRemainMs:null
+  });
+
+  switchScreen('lobby');
+  renderLobby();
+  SFX.pop();
+  toast('已返回房间');
+}
+
 function hostOnAction(msg){
   if(!msg||!msg.type)return;
   switch(msg.type){
@@ -821,7 +1243,7 @@ function hostOnAction(msg){
       }
       const name=Host.players[i].name;
       Host.players.splice(i,1);
-      if(Host.players.length===0){Host.active=false;return}
+      if(Host.players.length===0){Host.active=false;hostClearTurnTimer();return}
       if(Host.currentIdx>=Host.players.length)Host.currentIdx=0;
       hostBroadcastLobby();
       hostEvent(`${name} 离开了房间`);
@@ -831,14 +1253,9 @@ function hostOnAction(msg){
     case 'play':if(G.isHost)hostHandlePlay(msg.pid,msg.cardId,msg.color);break;
     case 'draw':if(G.isHost)hostHandleDraw(msg.pid);break;
     case 'pass':if(G.isHost)hostHandlePass(msg.pid);break;
-    case 'restart':{
-      if(!G.isHost||msg.pid!==G.pid)return;
-      if(Host.players.length<2){toast('人数不足');return}
-      hostStartGame();break;
-    }
+    case 'returnLobby':if(G.isHost&&msg.pid===G.pid)hostReturnToLobby();break;
   }
 }
-
 function sendAction(obj){
   if(!G.room)return;
   if(G.isHost)hostOnAction(obj);
@@ -867,6 +1284,7 @@ function renderOpponents(){
     const div=document.createElement('div');
     const isActive=pub.currentPid===p.pid&&!pub.winner;
     div.className='opponent'+(isActive?' active':'')+(p.out?' out':'');
+    div.setAttribute('data-pid',p.pid);
     let countText,countCls='';
     if(p.out){countText='出局';countCls=' out'}
     else if(p.count===1){countText='UNO!';countCls=' uno'}
@@ -887,7 +1305,14 @@ function renderTable(){
   for(let i=0;i<n;i++){const b=createBackEl();const off=(n-1-i)*3;b.style.transform=`translate(${off}px, ${-off}px)`;drawPile.appendChild(b)}
   $('deckCount').textContent=G.pub.deckCount||0;
   const discardPile=$('discardPile');discardPile.innerHTML='';
-  if(G.pub.topCard)discardPile.appendChild(createCardEl(G.pub.topCard));
+  if(G.pub.topCard){
+    const el=createCardEl(G.pub.topCard);
+    if(G.pub.topCard.id!==lastTopCardId){
+      lastTopCardId=G.pub.topCard.id;
+      el.classList.add('just-dropped');
+    }
+    discardPile.appendChild(el);
+  }
   const dot=$('colorDot');
   if(G.pub.currentColor){dot.style.background=`var(--${G.pub.currentColor})`;dot.style.boxShadow=`0 0 10px var(--${G.pub.currentColor})`}
 }
@@ -908,19 +1333,29 @@ function clientCanPlay(card){
 function renderHand(){
   const el=$('hand');el.innerHTML='';
   const hand=G.myHand||[];
-  // 校验选中是否仍有效
   if(G.selectedId){
     const still=hand.find(c=>c.id===G.selectedId);
     if(!still||!clientCanPlay(still))G.selectedId=null;
   }
-  hand.forEach(card=>{
+  const gotNewCard=hand.length>lastHandCount&&lastHandCount>0;
+  const newCardId=gotNewCard&&hand.length?hand[hand.length-1].id:null;
+  const stagger=_staggerHand;
+  if(stagger)_staggerHand=false;
+
+  hand.forEach((card,i)=>{
     const c=createCardEl(card);
     const canPlay=clientCanPlay(card);
     if(canPlay)c.classList.add('playable');
     if(G.selectedId===card.id)c.classList.add('selected');
+    if(newCardId===card.id)c.classList.add('newly-drawn');
+    if(stagger){
+      c.classList.add('stagger-in');
+      c.style.animationDelay=(i*55)+'ms';
+    }
     c.addEventListener('click',()=>onCardClick(card));
     el.appendChild(c);
   });
+  lastHandCount=hand.length;
   const me=G.pub&&G.pub.players.find(p=>p.pid===G.pid);
   $('outHint').classList.toggle('hidden',!(me&&me.out&&!G.pub.winner));
   updatePlayBtn();
@@ -936,10 +1371,10 @@ function renderStatus(){
   if(pub.currentPid===G.pid){
     if(G.selectedId){
       const c=G.myHand.find(x=>x.id===G.selectedId);
-      if(c)st.textContent='已选：'+cardDesc(c)+' · 点击出牌';
+      if(c)st.textContent='已选：'+cardDesc(c);
       else st.textContent='轮到你出牌';
     }else{
-      st.textContent=pub.drawnPid===G.pid?'选择牌出牌，或过牌':'轮到你出牌';
+      st.textContent=pub.drawnPid===G.pid?'出牌或过牌':'轮到你出牌';
     }
   }else{
     const cur=pub.players.find(p=>p.pid===pub.currentPid);
@@ -950,17 +1385,13 @@ function renderStatus(){
 }
 
 function updatePlayBtn(){
-  const btn=$('playBtn');
-  if(!btn)return;
+  const btn=$('playBtn');if(!btn)return;
   const pub=G.pub;
-  const can=!!G.selectedId
-    &&pub&&pub.started&&!pub.winner
-    &&pub.currentPid===G.pid;
+  const can=!!G.selectedId&&pub&&pub.started&&!pub.winner&&pub.currentPid===G.pid;
   btn.disabled=!can;
 }
 
 function getBaseCardSize(){return window.innerWidth<=520?{w:56,h:84}:{w:66,h:99}}
-
 function layoutHand(){
   const area=$('handArea'),hand=$('hand');
   if(!area||!hand)return;
@@ -986,32 +1417,27 @@ function layoutHand(){
   hand.style.width=(cw+step*(n-1))+'px';
   cards.forEach((c,i)=>{c.style.marginLeft=i===0?'0px':(step-cw)+'px'});
 }
-
 let _layoutRaf=0;
 function scheduleLayout(){
   cancelAnimationFrame(_layoutRaf);
   _layoutRaf=requestAnimationFrame(()=>{_layoutRaf=requestAnimationFrame(layoutHand)});
 }
-
 window.addEventListener('resize',()=>{if(G.screen==='game')scheduleLayout()});
 
-/* ============ 点击手牌：切换选中状态 ============ */
 function onCardClick(card){
+  initAudio();
   const pub=G.pub;
   if(!pub||!pub.started||pub.winner)return;
   if(pub.currentPid!==G.pid){toast('还没轮到你');return}
-  if(!clientCanPlay(card)){toast('这张牌不能出');return}
-  if(G.selectedId===card.id){
-    G.selectedId=null;          // 再点一次取消选中
-  }else{
-    G.selectedId=card.id;       // 选中
-  }
-  renderHand();
-  renderStatus();
+  if(!clientCanPlay(card)){toast('这张牌不能出');SFX.click();return}
+  SFX.click();
+  if(G.selectedId===card.id)G.selectedId=null;
+  else G.selectedId=card.id;
+  renderHand();renderStatus();
 }
 
-/* ============ 点击出牌按钮：打出选中的牌 ============ */
 function onPlayBtnClick(){
+  initAudio();
   const pub=G.pub;
   if(!pub||!pub.started||pub.winner)return;
   if(pub.currentPid!==G.pid){toast('还没轮到你');return}
@@ -1019,23 +1445,22 @@ function onPlayBtnClick(){
   const card=G.myHand.find(c=>c.id===G.selectedId);
   if(!card){G.selectedId=null;renderHand();renderStatus();return}
   if(!clientCanPlay(card)){toast('这张牌不能出');G.selectedId=null;renderHand();renderStatus();return}
+  SFX.pop();
   const cid=card.id;
   G.selectedId=null;
   renderHand();
-  if(card.color==='wild'){
-    showColorPicker(color=>sendAction({type:'play',pid:G.pid,cardId:cid,color}));
-  }else{
-    sendAction({type:'play',pid:G.pid,cardId:cid,color:null});
-  }
+  if(card.color==='wild')showColorPicker(color=>sendAction({type:'play',pid:G.pid,cardId:cid,color}));
+  else sendAction({type:'play',pid:G.pid,cardId:cid,color:null});
 }
-
 $('playBtn').addEventListener('click',onPlayBtnClick);
 
 $('drawPile').addEventListener('click',()=>{
+  initAudio();
   const pub=G.pub;
   if(!pub||!pub.started||pub.winner)return;
   if(pub.currentPid!==G.pid){toast('还没轮到你');return}
   if(pub.drawnPid===G.pid){toast('本回合已经摸过牌了');return}
+  SFX.click();
   G.selectedId=null;
   renderHand();
   sendAction({type:'draw',pid:G.pid});
@@ -1045,6 +1470,7 @@ $('passBtn').addEventListener('click',()=>{
   const pub=G.pub;
   if(!pub||pub.currentPid!==G.pid)return;
   if(pub.drawnPid!==G.pid)return;
+  SFX.click();
   G.selectedId=null;
   renderHand();
   sendAction({type:'pass',pid:G.pid});
@@ -1053,7 +1479,14 @@ $('passBtn').addEventListener('click',()=>{
 function showColorPicker(cb){
   const el=$('colorPicker');
   el.classList.remove('hidden');
-  const handler=e=>{const btn=e.target.closest('[data-color]');if(!btn)return;el.classList.add('hidden');el.removeEventListener('click',handler);cb(btn.dataset.color)};
+  const handler=e=>{
+    const btn=e.target.closest('[data-color]');
+    if(!btn)return;
+    SFX.click();
+    el.classList.add('hidden');
+    el.removeEventListener('click',handler);
+    cb(btn.dataset.color);
+  };
   el.addEventListener('click',handler);
 }
 
@@ -1063,14 +1496,14 @@ function showGameOver(pub){
   const iWin=pub.winner===G.pid;
   $('goTitle').textContent=iWin?'🎉 你赢了！':(winner?`${winner.name} 获胜`:'游戏结束');
   $('goSub').textContent=iWin?'恭喜你打完了所有手牌':'再接再厉，下一局翻盘！';
-  $('againBtn').classList.toggle('hidden',!G.isHost);
+  $('returnRoomBtn').classList.toggle('hidden',!G.isHost);
+  $('waitHostHint').classList.toggle('hidden',G.isHost);
 }
 
-$('againBtn').addEventListener('click',()=>{
+$('returnRoomBtn').addEventListener('click',()=>{
   if(!G.isHost)return;
-  G.selectedId=null;
-  $('gameOver').classList.add('hidden');
-  sendAction({type:'restart',pid:G.pid});
+  SFX.click();
+  hostReturnToLobby();
 });
 
 window.addEventListener('beforeunload',()=>{
@@ -1079,6 +1512,7 @@ window.addEventListener('beforeunload',()=>{
 
 (function boot(){
   $('nameInput').value='玩家'+G.pid.slice(1,4).toUpperCase();
+  updateSoundBtn();
   mqttConnect().catch(()=>{});
   switchScreen('home');
 })();
