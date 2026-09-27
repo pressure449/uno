@@ -32,6 +32,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .home-divider{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.28);font-size:11px;font-weight:700}
 .home-divider::before,.home-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.14)}
 .home-tip{min-height:18px;text-align:center;font-size:12px;color:#ff9a9a;font-weight:600}
+.home-tip-line{text-align:center;font-size:11px;color:rgba(255,255,255,.42);font-weight:600;line-height:1.5}
 #screenLobby{align-items:center;justify-content:center;padding:24px}
 .lobby-card{width:100%;max-width:400px;background:linear-gradient(160deg,rgba(30,42,36,.92),rgba(13,26,19,.95));border:2px solid rgba(255,216,77,.28);border-radius:24px;padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.6)}
 .lobby-title{font-size:15px;font-weight:700;color:rgba(255,255,255,.65);text-align:center;margin-bottom:6px}
@@ -78,6 +79,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 }
 .opponent.out{opacity:.35;filter:grayscale(.9);border-color:rgba(255,92,92,.3)}
 .opponent.penalty{animation:oppPenalty .5s ease}
+.opponent.uno-shout{animation:unoShoutFlash .8s ease}
+@keyframes unoShoutFlash{
+  0%,100%{box-shadow:0 0 18px rgba(255,216,77,.35)}
+  30%{box-shadow:0 0 40px rgba(255,92,92,.9);border-color:#ff5c5c}
+  60%{box-shadow:0 0 30px rgba(255,216,77,.7);border-color:#ffd84d}
+}
 @keyframes oppPenalty{
   0%,100%{transform:scale(1) translateX(0)}
   20%{transform:scale(1.06) translateX(-3px)}
@@ -278,6 +285,105 @@ body.shake-red{animation:screenShakeRed .6s ease}
 .panel-hint{font-size:11px;color:rgba(255,255,255,.35);font-weight:600;margin-top:4px}
 #connBadge{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#ff9a9a;font-size:11px;font-weight:800;padding:6px 16px;border-radius:14px;z-index:500;letter-spacing:1px;transition:.3s}
 #connBadge.ok{opacity:0;pointer-events:none}
+
+/* ============ 喊 UNO 遮罩 ============ */
+#unoOverlay{
+  position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);
+  z-index:450;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  padding:24px 32px;
+  background:linear-gradient(160deg,rgba(120,10,20,.96),rgba(60,0,10,.98));
+  border:3px solid #ffd84d;
+  border-radius:22px;
+  box-shadow:0 0 60px rgba(255,92,92,.85),0 0 100px rgba(255,216,77,.5),0 20px 60px rgba(0,0,0,.8);
+  animation:unoPopIn .4s cubic-bezier(.2,1.6,.5,1);
+  min-width:260px;max-width:92vw;
+}
+@keyframes unoPopIn{
+  0%{transform:translate(-50%,-50%) scale(.3);opacity:0}
+  60%{transform:translate(-50%,-50%) scale(1.08)}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:1}
+}
+.uno-title{
+  font-size:32px;font-weight:900;font-style:italic;letter-spacing:3px;
+  color:#ffd84d;text-shadow:0 0 24px rgba(255,216,77,.9),0 3px 0 #b3202c;
+  animation:unoTitleFlash .6s ease-in-out infinite alternate;
+}
+@keyframes unoTitleFlash{
+  from{transform:scale(1)}
+  to{transform:scale(1.06)}
+}
+.uno-sub{
+  font-size:11px;font-weight:700;letter-spacing:2px;
+  color:rgba(255,255,255,.7);
+}
+#unoShoutBtn{
+  padding:14px 34px;
+  border-radius:50px;border:none;
+  background:radial-gradient(circle at 30% 25%,#ffe27a,#ffd84d 55%,#e8a900);
+  color:#1a1a1a;font-weight:900;font-size:18px;letter-spacing:2px;
+  font-family:inherit;cursor:pointer;
+  box-shadow:0 5px 0 #b99a1e,0 10px 24px rgba(0,0,0,.5);
+  transition:transform .12s,box-shadow .12s;
+  min-width:180px;
+}
+#unoShoutBtn:not(:disabled){animation:unoBtnPulse 1s ease-in-out infinite}
+@keyframes unoBtnPulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.05)}
+}
+#unoShoutBtn:not(:disabled):active{transform:translateY(3px) scale(1.02);box-shadow:0 1px 0 #b99a1e,0 4px 12px rgba(0,0,0,.5)}
+#unoShoutBtn:disabled{opacity:.65;cursor:not-allowed;filter:grayscale(.4);animation:none}
+.uno-bar{
+  width:220px;height:8px;border-radius:4px;
+  background:rgba(0,0,0,.4);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.18);
+}
+#unoTimerFill{
+  height:100%;width:100%;
+  background:linear-gradient(90deg,#ffd84d,#ff8a8a,#ff5c5c);
+  border-radius:4px;
+  transition:width .1s linear;
+}
+.uno-mic-bar{
+  width:220px;height:10px;border-radius:5px;
+  background:rgba(0,0,0,.4);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.18);
+  position:relative;
+}
+.uno-mic-bar::after{
+  content:'95';
+  position:absolute;left:calc(95 / 255 * 100%);
+  top:50%;transform:translate(-50%,-50%);
+  font-size:8px;color:rgba(255,255,255,.55);font-weight:800;
+  pointer-events:none;
+}
+#unoMicFill{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,#2a9d54,#8ee6a8 40%,#ffd84d 75%,#ff5c5c);
+  border-radius:5px;
+  transition:width .05s linear;
+}
+#unoMicFill.pass{box-shadow:0 0 12px rgba(142,230,168,.9)}
+.uno-hint{
+  font-size:10px;color:rgba(255,255,255,.55);
+  font-weight:600;letter-spacing:1px;
+  text-align:center;max-width:240px;
+}
+.uno-heard{
+  font-size:12px;font-weight:700;color:#ffd84d;
+  letter-spacing:1px;text-align:center;
+  min-height:18px;
+  padding:4px 12px;
+  background:rgba(0,0,0,.35);
+  border-radius:10px;
+  word-break:break-all;
+  max-width:240px;
+}
+
+/* ============ 响应式 ============ */
 @media (max-width:520px){
   :root{--card-w:56px;--card-h:84px}
   #table{gap:32px}
@@ -293,6 +399,13 @@ body.shake-red{animation:screenShakeRed .6s ease}
   #startCountdown{font-size:110px}
   #startCountdown.go{font-size:72px}
   #turnTimer{font-size:10px;padding:3px 7px;min-width:40px}
+  #unoOverlay{padding:18px 22px;top:34%;min-width:220px}
+  .uno-title{font-size:24px}
+  #unoShoutBtn{padding:12px 24px;font-size:15px;min-width:150px}
+  .uno-bar{width:170px;height:6px}
+  .uno-mic-bar{width:170px;height:8px}
+  .uno-hint{max-width:180px}
+  .uno-heard{max-width:180px;font-size:11px}
 }
 </style>
 </head>
@@ -303,6 +416,18 @@ body.shake-red{animation:screenShakeRed .6s ease}
 <div id="startOverlay" class="hidden">
   <div id="startCountdown">3</div>
   <div id="startSub">准 备 开 战</div>
+</div>
+
+<!-- 喊 UNO 遮罩 -->
+<div id="unoOverlay" class="hidden">
+  <div class="uno-title">⚡ 喊 UNO!</div>
+  <div class="uno-sub">必须说出 "UNO" 才有效，否则罚摸 2 张</div>
+  <button id="unoShoutBtn">🎤 点击开始喊</button>
+  <div class="uno-bar"><div id="unoTimerFill"></div></div>
+  <div class="uno-mic-bar"><div id="unoMicFill"></div></div>
+  <div class="uno-heard" id="unoHeard">—</div>
+  <div class="uno-hint" id="unoStatusHint">5 秒内喊出来！</div>
+  <div class="uno-hint" id="unoMicHint">准备就绪</div>
 </div>
 
 <div id="app">
@@ -318,6 +443,7 @@ body.shake-red{animation:screenShakeRed .6s ease}
         <button id="joinBtn" class="btn-secondary">加入</button>
       </div>
       <div class="home-tip" id="homeTip"></div>
+      <div class="home-tip-line">剩 1 张牌时需喊出 UNO，否则罚摸 2 张</div>
     </div>
   </div>
 
@@ -401,17 +527,56 @@ body.shake-red{animation:screenShakeRed .6s ease}
 const COLORS=['red','yellow','green','blue'];
 const COLOR_NAME={red:'红',yellow:'黄',green:'绿',blue:'蓝'};
 const BROKER='wss://broker.emqx.io:8084/mqtt';
-const PREFIX='uno/v8/';
+const PREFIX='uno/v11/';
 const BOT_NAMES=['小蓝','小绿','小黄'];
 const MERCY_LIMIT=25;
 const MERCY_VALUES=['wild6','wild10','reverse_draw4','skip_everyone','discard_all'];
-const TURN_TIME_MS=30000;   // 每回合 30 秒
+const TURN_TIME_MS=30000;
+const UNO_WINDOW_MS=5000;
+const UNO_MIC_THRESHOLD=95;
+const UNO_MIC_PEAK_THRESHOLD=150;
+const UNO_MIC_CHECK_MS=4000;   // 语音识别等待时间
+const UNO_SPEECH_KEYWORDS=/uno|乌诺|优诺|尤诺|优no|尤no|you\s*no|u\s*no|优咯|优若|乌no/i;
 
-const G={pid:'p'+Math.random().toString(36).slice(2,9),name:'',room:'',isHost:false,pub:null,myHand:[],joined:false,screen:'home',selectedId:null};
-const Host={active:false,players:[],deck:[],discard:[],currentIdx:0,dir:1,currentColor:null,started:false,winner:null,drawnBy:null,lobbyPlayers:[],mercyMode:false,lastAction:null,turnStartedAt:0,turnTimer:null};
+const G={
+  pid:'p'+Math.random().toString(36).slice(2,9),
+  name:'',room:'',isHost:false,pub:null,myHand:[],
+  joined:false,screen:'home',selectedId:null,
+  localPlayLock:false,
+  _lockTimer:null,
+  _lastSeenCurrentPid:null,
+  _lastSeenTurnSeq:null,
+  _unoShouting:false
+};
+const Host={
+  active:false,players:[],deck:[],discard:[],
+  currentIdx:0,dir:1,currentColor:null,
+  started:false,winner:null,drawnBy:null,
+  lobbyPlayers:[],mercyMode:false,lastAction:null,
+  turnStartedAt:0,turnTimer:null,
+  turnSeq:0,
+  pendingUnoPid:null,
+  pendingUnoDeadline:0,
+  pendingUnoTimer:null
+};
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 const $=id=>document.getElementById(id);
+
+function setLocalPlayLock(){
+  G.localPlayLock=true;
+  clearTimeout(G._lockTimer);
+  G._lockTimer=setTimeout(()=>{
+    G.localPlayLock=false;
+    if(G.screen==='game'){renderHand();renderStatus()}
+  },4000);
+}
+function clearLocalPlayLock(){
+  if(!G.localPlayLock)return;
+  G.localPlayLock=false;
+  clearTimeout(G._lockTimer);
+  G._lockTimer=null;
+}
 
 let audioCtx=null;
 let soundEnabled=localStorage.getItem('uno_sound')!=='off';
@@ -447,7 +612,11 @@ const SFX={
   pop(){tone(880,0.05,{type:'sine',vol:0.08});tone(1200,0.06,{type:'sine',vol:0.06,delay:0.04})},
   tickHi(){tone(1200,0.14,{type:'triangle',vol:0.16})},
   tickLo(){tone(520,0.1,{type:'triangle',vol:0.12})},
-  timeout(){tone(400,0.15,{type:'sawtooth',vol:0.14,to:250});tone(300,0.2,{type:'sawtooth',vol:0.12,delay:0.12})}
+  timeout(){tone(400,0.15,{type:'sawtooth',vol:0.14,to:250});tone(300,0.2,{type:'sawtooth',vol:0.12,delay:0.12})},
+  skip(){tone(880,0.06,{type:'square',vol:0.1});tone(1200,0.08,{type:'square',vol:0.09,delay:0.05})},
+  unoUrgent(){[880,1200,1600].forEach((f,i)=>tone(f,0.08,{type:'square',vol:0.15,delay:i*0.06}))},
+  unoShoutOK(){[523,784,1047,1319].forEach((f,i)=>tone(f,0.15,{type:'triangle',vol:0.18,delay:i*0.08}))},
+  listening(){tone(440,0.1,{type:'sine',vol:0.1});tone(660,0.15,{type:'sine',vol:0.1,delay:0.12})}
 };
 
 function shakeScreen(red){
@@ -571,10 +740,14 @@ $('createBtn').addEventListener('click',async()=>{
   try{setHomeTip('正在连接服务器…',true);await mqttConnect()}catch{setHomeTip('无法连接 MQTT 服务器，请刷新重试');return}
   setHomeTip('');
   G.room=randomRoom();G.isHost=true;G.joined=true;G.selectedId=null;
+  clearLocalPlayLock();
+  G._lastSeenCurrentPid=null;
+  G._lastSeenTurnSeq=null;
   Host.active=true;
   Host.players=[{pid:G.pid,name:G.name,hand:[],isBot:false,out:false}];
   Host.started=false;Host.winner=null;Host.mercyMode=false;Host.lastAction=null;
-  Host.turnStartedAt=0;Host.turnTimer=null;
+  Host.turnStartedAt=0;Host.turnTimer=null;Host.turnSeq=0;
+  hostClearUnoCheck();
   resetTransitionFlags();
   subscribeAsHost();enterLobby();hostBroadcastLobby();
   toast('房间已创建：'+G.room);
@@ -588,6 +761,9 @@ $('joinBtn').addEventListener('click',async()=>{
   try{setHomeTip('正在连接服务器…',true);await mqttConnect()}catch{setHomeTip('无法连接 MQTT 服务器，请刷新重试');return}
   setHomeTip('');
   G.room=room;G.isHost=false;G.joined=false;G.selectedId=null;
+  clearLocalPlayLock();
+  G._lastSeenCurrentPid=null;
+  G._lastSeenTurnSeq=null;
   resetTransitionFlags();
   subscribeAsClient();enterLobby();
   $('lobbyRoom').textContent=room;
@@ -665,11 +841,18 @@ $('leaveBtn').addEventListener('click',leaveRoom);
 
 function leaveRoom(){
   if(G.room&&!G.isHost&&G.joined)mqttPub(PREFIX+G.room+'/action',{type:'leave',pid:G.pid});
-  if(G.isHost)hostClearTurnTimer();
+  if(G.isHost){hostClearTurnTimer();hostClearUnoCheck()}
+  clearLocalPlayLock();
   G.room='';G.isHost=false;G.joined=false;G.pub=null;G.myHand=[];G.selectedId=null;
+  G._lastSeenCurrentPid=null;
+  G._lastSeenTurnSeq=null;
+  G._unoShouting=false;
   Host.active=false;Host.players=[];Host.started=false;Host.winner=null;Host.lastAction=null;
-  Host.turnStartedAt=0;Host.turnTimer=null;
+  Host.turnStartedAt=0;Host.turnTimer=null;Host.turnSeq=0;
+  hostClearUnoCheck();
   resetTransitionFlags();
+  resetRenderCaches();
+  $('unoOverlay').classList.add('hidden');
   $('gameOver').classList.add('hidden');
   $('colorPicker').classList.add('hidden');
   $('startOverlay').classList.add('hidden');
@@ -683,6 +866,16 @@ let _prevStarted=false;
 let _inCountdown=false;
 let _staggerHand=false;
 function resetTransitionFlags(){_prevStarted=false;_inCountdown=false;_staggerHand=false}
+
+let _lastHandIds=null;
+function resetRenderCaches(){
+  _lastHandIds=null;
+  const opp=$('opponents');if(opp){opp.innerHTML='';opp.dataset.pids=''}
+  const dp=$('drawPile');if(dp){dp.innerHTML='';dp.dataset.n=''}
+  const disc=$('discardPile');if(disc){disc.innerHTML='';disc.dataset.topId=''}
+  const dot=$('colorDot');if(dot){dot.dataset.color=''}
+  const hand=$('hand');if(hand)hand.innerHTML='';
+}
 
 function playStartTransition(onDone){
   const overlay=$('startOverlay');
@@ -723,6 +916,7 @@ function enterGameScreen(pub){
     switchScreen('game');
     $('roomBadge').textContent='房间 '+G.room;
     lastActionTs=0;lastTopCardId=null;lastHandCount=0;
+    _lastHandIds=null;
   }
   renderGame();
   if(pub&&pub.winner)showGameOver(pub);
@@ -749,7 +943,6 @@ function handleGameStart(pub){
   }
 }
 
-/* ============ 倒计时显示 ============ */
 let _turnRemainMs=0;
 let _turnReceivedAt=0;
 function updateTurnTimerDisplay(){
@@ -767,9 +960,292 @@ function updateTurnTimerDisplay(){
 }
 setInterval(updateTurnTimerDisplay,200);
 
+/* ============ 喊 UNO 遮罩渲染 ============ */
+let _unoDisplayState=null;
+function renderUnoOverlay(){
+  const el=$('unoOverlay');
+  const pub=G.pub;
+  const pending=pub&&pub.pendingUno;
+  const isMe=pending&&pending.pid===G.pid;
+
+  if(!isMe){
+    if(_unoDisplayState==='showing'){
+      el.classList.add('hidden');
+      _unoDisplayState='hidden';
+      // 停止任何正在进行的语音识别
+      if(G._unoAbort){try{G._unoAbort()}catch(e){}}
+    }
+    return;
+  }
+
+  if(_unoDisplayState!=='showing'){
+    el.classList.remove('hidden');
+    _unoDisplayState='showing';
+    const btn=$('unoShoutBtn');
+    btn.disabled=false;
+    btn.textContent='🎤 点击开始喊';
+    $('unoStatusHint').textContent='5 秒内喊出来！';
+    $('unoHeard').textContent='—';
+    $('unoMicHint').textContent='点击按钮后说出 UNO';
+    const mf=$('unoMicFill');
+    if(mf){mf.style.width='0%';mf.classList.remove('pass')}
+    const tf=$('unoTimerFill');
+    if(tf){
+      tf.style.transition='none';
+      tf.style.width='100%';
+      void tf.offsetWidth;
+      tf.style.transition='width .1s linear';
+    }
+    SFX.unoUrgent();
+    if(navigator.vibrate){try{navigator.vibrate([80,40,80,40,80])}catch(e){}}
+  }
+}
+
+setInterval(()=>{
+  if(_unoDisplayState!=='showing')return;
+  const pub=G.pub;
+  const pending=pub&&pub.pendingUno;
+  if(!pending||pending.pid!==G.pid)return;
+  const pct=Math.max(0,Math.min(100,pending.remainMs/UNO_WINDOW_MS*100));
+  const fill=$('unoTimerFill');
+  if(fill)fill.style.width=pct+'%';
+  const sec=Math.ceil(pending.remainMs/1000);
+  const hint=$('unoStatusHint');
+  if(hint&&!hint.dataset.locked)hint.textContent=sec>0?`${sec} 秒内喊出来！`:'太晚了…';
+},100);
+
+/* ============ 语音识别（Speech-to-Text） ============ */
+function getSpeechRecognition(){
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+
+function runSpeechRecognition(){
+  return new Promise((resolve)=>{
+    const SR=getSpeechRecognition();
+    if(!SR)return resolve({passed:false,reason:'浏览器不支持语音识别',heard:''});
+
+    let recognition=null;
+    let timer=null;
+    let done=false;
+    let passed=false;
+    let heardText='';
+    let startTime=Date.now();
+    let aborted=false;
+
+    const cleanup=()=>{
+      if(timer){clearTimeout(timer);timer=null}
+      if(recognition){
+        try{recognition.onresult=null}catch(e){}
+        try{recognition.onerror=null}catch(e){}
+        try{recognition.onend=null}catch(e){}
+        try{recognition.stop()}catch(e){}
+        try{recognition.abort()}catch(e){}
+      }
+      G._unoAbort=null;
+    };
+
+    G._unoAbort=()=>{aborted=true;cleanup();};
+
+    const finish=(result)=>{
+      if(done)return;
+      done=true;
+      cleanup();
+      resolve(result);
+    };
+
+    const tryStart=()=>{
+      try{
+        recognition=new SR();
+      }catch(e){
+        return finish({passed:false,reason:'初始化失败',heard:''});
+      }
+      recognition.lang='zh-CN';
+      recognition.continuous=true;
+      recognition.interimResults=true;
+      recognition.maxAlternatives=3;
+
+      recognition.onresult=(e)=>{
+        if(aborted||done)return;
+        for(let i=e.resultIndex;i<e.results.length;i++){
+          const transcript=(e.results[i][0]&&e.results[i][0].transcript)||'';
+          heardText=transcript;
+          const heardEl=$('unoHeard');
+          if(heardEl)heardEl.textContent='「'+transcript+'」';
+          const hint=$('unoMicHint');
+          if(hint)hint.textContent=e.results[i].isFinal?'识别完成':'识别中…';
+
+          if(UNO_SPEECH_KEYWORDS.test(transcript)){
+            passed=true;
+            SFX.unoShoutOK();
+            return finish({passed:true,reason:'',heard:transcript});
+          }
+        }
+      };
+
+      recognition.onerror=(e)=>{
+        console.warn('[SR]',e.error);
+        if(done||aborted)return;
+        if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+          return finish({passed:false,reason:'麦克风/识别权限被拒绝',heard:heardText});
+        }
+        if(e.error==='audio-capture'){
+          return finish({passed:false,reason:'未找到麦克风设备',heard:heardText});
+        }
+        // no-speech / network / aborted 等：继续等
+      };
+
+      recognition.onend=()=>{
+        if(done||aborted)return;
+        if(Date.now()-startTime>UNO_MIC_CHECK_MS){
+          return finish({
+            passed:false,
+            reason:heardText?`听成了「${heardText}」`:'没有听清',
+            heard:heardText
+          });
+        }
+        // 重新启动（浏览器可能自动结束）
+        try{recognition.start()}catch(e){}
+      };
+
+      try{recognition.start()}
+      catch(e){
+        console.warn('[SR start]',e);
+        return finish({passed:false,reason:'启动识别失败',heard:''});
+      }
+    };
+
+    timer=setTimeout(()=>{
+      if(passed||done)return;
+      finish({
+        passed:false,
+        reason:heardText?`听成了「${heardText}」`:'没有听清',
+        heard:heardText
+      });
+    },UNO_MIC_CHECK_MS);
+
+    tryStart();
+  });
+}
+
+/* ============ 降级：音量检测 ============ */
+async function runVolumeCheck(){
+  const stream=await navigator.mediaDevices.getUserMedia({
+    audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}
+  });
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const src=ctx.createMediaStreamSource(stream);
+  const an=ctx.createAnalyser();
+  an.fftSize=512;
+  an.smoothingTimeConstant=0.2;
+  src.connect(an);
+  const data=new Uint8Array(an.frequencyBinCount);
+  const startTime=Date.now();
+  let quietFrames=0,quietDone=false,peak=0;
+  const fill=$('unoMicFill');
+
+  const passed=await new Promise(resolve=>{
+    const check=()=>{
+      an.getByteFrequencyData(data);
+      let sum=0;
+      for(let i=0;i<data.length;i++)sum+=data[i];
+      const avg=sum/data.length;
+      if(avg>peak)peak=avg;
+      if(fill){
+        const pct=Math.min(100,avg/255*100);
+        fill.style.width=pct+'%';
+        fill.classList.toggle('pass',avg>UNO_MIC_THRESHOLD);
+      }
+      const hint=$('unoMicHint');
+      if(hint)hint.textContent=`音量 ${Math.round(avg)} / 需要 ${UNO_MIC_THRESHOLD}`;
+
+      if(!quietDone){
+        if(avg<30){quietFrames++;if(quietFrames>=8)quietDone=true}
+        else quietFrames=0;
+      }
+      if(quietDone&&avg>UNO_MIC_THRESHOLD)return resolve(true);
+      if(peak>UNO_MIC_PEAK_THRESHOLD)return resolve(true);
+      if(Date.now()-startTime>UNO_MIC_CHECK_MS)return resolve(false);
+      requestAnimationFrame(check);
+    };
+    check();
+  });
+
+  stream.getTracks().forEach(t=>t.stop());
+  try{ctx.close()}catch(e){}
+  return passed;
+}
+
+/* ============ 喊 UNO 按钮 ============ */
+$('unoShoutBtn').addEventListener('click',attemptUnoShout);
+
+async function attemptUnoShout(){
+  if(G._unoShouting)return;
+  const btn=$('unoShoutBtn');
+  btn.disabled=true;
+  btn.textContent='🎤 聆听中…';
+  G._unoShouting=true;
+  $('unoStatusHint').dataset.locked='1';
+  $('unoStatusHint').textContent='请清晰地说出：UNO！';
+  $('unoHeard').textContent='—';
+  SFX.listening();
+
+  const hasSR=!!getSpeechRecognition();
+  const hasMic=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
+
+  let result={passed:false,reason:'',heard:''};
+
+  if(hasSR){
+    $('unoMicHint').textContent='使用语音识别判定…';
+    try{
+      result=await runSpeechRecognition();
+    }catch(e){
+      console.warn('[SR exc]',e);
+      result={passed:false,reason:'识别出错',heard:''};
+    }
+  }else if(hasMic){
+    $('unoMicHint').textContent='不支持语音识别，改用音量检测';
+    try{
+      const ok=await runVolumeCheck();
+      result=ok?{passed:true,reason:'',heard:''}:{passed:false,reason:'音量不够响',heard:''};
+    }catch(e){
+      console.warn('[mic]',e);
+      if(e.name==='NotAllowedError')result={passed:false,reason:'麦克风权限被拒绝',heard:''};
+      else if(e.name==='NotFoundError')result={passed:false,reason:'未找到麦克风设备',heard:''};
+      else result={passed:false,reason:'麦克风不可用',heard:''};
+    }
+  }else{
+    result={passed:false,reason:'浏览器不支持语音/麦克风',heard:''};
+  }
+
+  if(result.passed){
+    $('unoStatusHint').textContent='✓ 通过！';
+    $('unoMicHint').textContent='UNO 已确认';
+  }else{
+    $('unoStatusHint').textContent='✗ '+(result.reason||'未通过');
+    $('unoMicHint').textContent='罚摸 2 张';
+  }
+
+  sendAction({type:'shoutUno',pid:G.pid,micPassed:result.passed});
+
+  setTimeout(()=>{
+    $('unoOverlay').classList.add('hidden');
+    _unoDisplayState='hidden';
+    delete $('unoStatusHint').dataset.locked;
+    if(result.passed)SFX.unoShoutOK();
+    else SFX.penalty();
+    G._unoShouting=false;
+  },result.passed?500:1300);
+}
+
 let lastActionTs=0;
 let lastTopCardId=null;
 let lastHandCount=0;
+
+function handleTurnSeqChange(newSeq){
+  if(G._lastSeenTurnSeq===newSeq)return;
+  G._lastSeenTurnSeq=newSeq;
+  clearLocalPlayLock();
+}
 
 function onStateMessage(msg){
   if(!msg||!msg.type)return;
@@ -786,7 +1262,11 @@ function onStateMessage(msg){
     G.pub=msg;
     if(prevCurrent!==msg.currentPid)G.selectedId=null;
 
-    // 更新回合倒计时基准
+    if(typeof msg.turnSeq==='number'){
+      handleTurnSeqChange(msg.turnSeq);
+    }
+    G._lastSeenCurrentPid=msg.currentPid;
+
     if(msg.started&&!msg.winner&&typeof msg.turnRemainMs==='number'){
       _turnRemainMs=msg.turnRemainMs;
       _turnReceivedAt=Date.now();
@@ -800,16 +1280,21 @@ function onStateMessage(msg){
         handleActionFeedback(msg.lastAction,msg,true);
       }
       handleGameStart(msg);
+      renderUnoOverlay();
     }else{
       _prevStarted=false;_inCountdown=false;
       _turnRemainMs=0;
+      clearLocalPlayLock();
       if(G.screen==='game')switchScreen('lobby');
+      $('unoOverlay').classList.add('hidden');
+      _unoDisplayState='hidden';
       $('gameOver').classList.add('hidden');
       $('colorPicker').classList.add('hidden');
       $('startOverlay').classList.add('hidden');
       $('startOverlay').classList.remove('out');
       $('turnTimer').classList.add('hidden');
       G.selectedId=null;G.myHand=[];
+      resetRenderCaches();
       renderLobby();
     }
     return;
@@ -853,6 +1338,33 @@ function handleActionFeedback(action,pub,prevStarted){
       if(action.pid===G.pid)showFloatText('UNO!','#ff5c5c',window.innerWidth/2,window.innerHeight*0.35,true);
       break;
     }
+    case 'unoShout':{
+      SFX.unoShoutOK();
+      const target=document.querySelector(`.opponent[data-pid="${action.pid}"]`);
+      if(target){
+        target.classList.add('uno-shout');
+        setTimeout(()=>target.classList.remove('uno-shout'),900);
+        const c=elementCenter(target);
+        showFloatText('UNO!','#ffd84d',c.x,c.y,true);
+      }else if(action.pid===G.pid){
+        showFloatText('UNO!','#ffd84d',window.innerWidth/2,window.innerHeight*0.35,true);
+      }
+      break;
+    }
+    case 'unoPenalty':{
+      SFX.penalty();
+      shakeScreen(true);
+      const target=document.querySelector(`.opponent[data-pid="${action.pid}"]`);
+      if(target){
+        target.classList.add('penalty');
+        setTimeout(()=>target.classList.remove('penalty'),550);
+        const c=elementCenter(target);
+        showFloatText('+2 罚','#ff5c5c',c.x,c.y,true);
+      }else if(action.pid===G.pid){
+        showFloatText('+2 罚','#ff5c5c',window.innerWidth/2,window.innerHeight*0.35,true);
+      }
+      break;
+    }
     case 'out':{
       SFX.penalty();
       shakeScreen(true);
@@ -880,18 +1392,30 @@ function hostBroadcastLobby(){
 
 function hostBroadcast(){
   if(!G.isHost||!G.room)return;
+
+  if(Host.pendingUnoPid){
+    const p=Host.players.find(x=>x.pid===Host.pendingUnoPid);
+    if(!p||p.hand.length!==1||p.out)hostClearUnoCheck();
+  }
+
   const top=Host.discard[Host.discard.length-1]||null;
   const players=Host.players.map(p=>({pid:p.pid,name:p.name,isBot:!!p.isBot,count:p.hand.length,out:!!p.out}));
   const turnRemainMs=(Host.started&&!Host.winner)
     ? Math.max(0,TURN_TIME_MS-(Date.now()-Host.turnStartedAt))
     : null;
+  const pendingUno=Host.pendingUnoPid?{
+    pid:Host.pendingUnoPid,
+    remainMs:Math.max(0,Host.pendingUnoDeadline-Date.now())
+  }:null;
+
   const pub={
     type:'state',started:Host.started,players,
     currentPid:(Host.started&&!Host.winner)?Host.players[Host.currentIdx].pid:null,
     dir:Host.dir,topCard:top,currentColor:Host.currentColor,
     deckCount:Host.deck.length,drawnPid:Host.drawnBy,winner:Host.winner,
     mercyMode:!!Host.mercyMode,lastAction:Host.lastAction,
-    turnRemainMs
+    turnRemainMs,turnSeq:Host.turnSeq,
+    pendingUno
   };
   mqttPub(PREFIX+G.room+'/state',pub);
   for(const p of Host.players){
@@ -903,12 +1427,16 @@ function hostBroadcast(){
   if(me)G.myHand=me.hand;
   G.pub=pub;
 
+  handleTurnSeqChange(pub.turnSeq);
+  G._lastSeenCurrentPid=pub.currentPid;
+
   if(Host.started){
     if(G.screen==='game'&&Host.lastAction&&Host.lastAction.ts>lastActionTs){
       lastActionTs=Host.lastAction.ts;
       handleActionFeedback(Host.lastAction,pub,true);
     }
     handleGameStart(pub);
+    renderUnoOverlay();
   }
 }
 
@@ -918,7 +1446,31 @@ function hostEvent(msg,mercy){
   toast(msg,mercy);
 }
 
-/* ============ 回合计时器（房主） ============ */
+function hostStartUnoCheck(pid){
+  hostClearUnoCheck();
+  Host.pendingUnoPid=pid;
+  Host.pendingUnoDeadline=Date.now()+UNO_WINDOW_MS;
+  Host.pendingUnoTimer=setTimeout(()=>{
+    if(Host.pendingUnoPid!==pid)return;
+    hostPunishUno(pid);
+  },UNO_WINDOW_MS);
+}
+function hostClearUnoCheck(){
+  if(Host.pendingUnoTimer){clearTimeout(Host.pendingUnoTimer);Host.pendingUnoTimer=null}
+  Host.pendingUnoPid=null;
+  Host.pendingUnoDeadline=0;
+}
+function hostPunishUno(pid){
+  const p=Host.players.find(x=>x.pid===pid);
+  hostClearUnoCheck();
+  if(!p)return;
+  hostDrawTo(p,2);
+  hostCheckMercyAll();
+  Host.lastAction={ts:Date.now(),type:'unoPenalty',pid};
+  hostEvent(`💥 ${p.name} 没喊 UNO，罚摸 2 张`,true);
+  hostBroadcast();
+}
+
 function hostStartTurnTimer(){
   hostClearTurnTimer();
   Host.turnStartedAt=Date.now();
@@ -959,6 +1511,7 @@ function hostCheckMercyAll(){
 
 function hostStartGame(){
   hostClearTurnTimer();
+  hostClearUnoCheck();
   Host.deck=shuffle(buildDeck(Host.mercyMode));
   Host.discard=[];Host.dir=1;Host.currentIdx=0;Host.winner=null;Host.drawnBy=null;
   for(const p of Host.players){p.hand=[];p.out=false}
@@ -970,6 +1523,7 @@ function hostStartGame(){
     Host.discard.push(c);Host.currentColor=c.color;break;
   }
   Host.started=true;
+  Host.turnSeq++;
   Host.lastAction={ts:Date.now(),type:'start'};
   hostStartTurnTimer();
   hostBroadcast();
@@ -1013,6 +1567,7 @@ function hostAdvance(skip=0){
   for(let i=0;i<steps;i++)idx=findNextAlive(idx,Host.dir);
   Host.currentIdx=idx;
   Host.drawnBy=null;
+  Host.turnSeq++;
   hostStartTurnTimer();
   hostBroadcast();
   hostMaybeBot();
@@ -1050,6 +1605,7 @@ function hostHandlePlay(pid,cardId,color){
     Host.winner=cur.pid;
     Host.lastAction={ts:Date.now(),type:'win',pid:cur.pid};
     hostClearTurnTimer();
+    hostClearUnoCheck();
     hostBroadcast();
     hostEvent(`🏆 ${cur.name} 获胜！`);
     return;
@@ -1057,6 +1613,7 @@ function hostHandlePlay(pid,cardId,color){
 
   let skip=0;
   const aliveCount=Host.players.filter(p=>!p.out).length;
+  let customDelay=380;
 
   if(card.value==='skip'){skip=1}
   else if(card.value==='reverse'){
@@ -1083,17 +1640,26 @@ function hostHandlePlay(pid,cardId,color){
   }
   else if(card.value==='skip_everyone'){
     skip=Math.max(0,aliveCount-1);
+    SFX.skip();
+    let tmpIdx=Host.currentIdx;
+    for(let i=0;i<=skip;i++)tmpIdx=findNextAlive(tmpIdx,Host.dir);
+    const willBeSelf=Host.players[tmpIdx].pid===cur.pid;
+    if(willBeSelf)customDelay=200;
   }
 
   if(cur.hand.length===1){
-    if(Host.lastAction.type!=='penalty')Host.lastAction={ts:Date.now(),type:'uno',pid};
-    hostEvent(`${cur.name}：UNO！`);
+    if(cur.isBot){
+      hostEvent(`${cur.name}：UNO！`);
+      Host.lastAction={ts:Date.now(),type:'unoShout',pid:cur.pid};
+    }else{
+      hostStartUnoCheck(cur.pid);
+    }
   }else if(dAllMsg){
     hostEvent(dAllMsg);
   }
 
   hostBroadcast();
-  setTimeout(()=>hostAdvance(skip),380);
+  setTimeout(()=>hostAdvance(skip),customDelay);
 }
 
 function hostHandleDraw(pid){
@@ -1185,18 +1751,27 @@ function hostBotTurn(){
 function hostReturnToLobby(){
   if(!G.isHost||!G.room)return;
   hostClearTurnTimer();
+  hostClearUnoCheck();
+  clearLocalPlayLock();
   Host.started=false;
   Host.winner=null;
   Host.deck=[];Host.discard=[];
   Host.currentIdx=0;Host.dir=1;Host.currentColor=null;
   Host.drawnBy=null;Host.lastAction=null;
   Host.turnStartedAt=0;
+  Host.turnSeq=0;
   for(const p of Host.players){p.hand=[];p.out=false}
 
   G.selectedId=null;G.myHand=[];G.pub=null;
+  G._lastSeenCurrentPid=null;
+  G._lastSeenTurnSeq=null;
+  G._unoShouting=false;
   resetTransitionFlags();
+  resetRenderCaches();
   lastActionTs=0;lastTopCardId=null;lastHandCount=0;
   _turnRemainMs=0;
+  _unoDisplayState='hidden';
+  $('unoOverlay').classList.add('hidden');
   $('gameOver').classList.add('hidden');
   $('colorPicker').classList.add('hidden');
   $('startOverlay').classList.add('hidden');
@@ -1210,7 +1785,7 @@ function hostReturnToLobby(){
     players:Host.players.map(p=>({pid:p.pid,name:p.name,isBot:!!p.isBot,count:0,out:false})),
     currentPid:null,dir:1,topCard:null,currentColor:null,
     deckCount:0,drawnPid:null,winner:null,
-    mercyMode:!!Host.mercyMode,lastAction:null,turnRemainMs:null
+    mercyMode:!!Host.mercyMode,lastAction:null,turnRemainMs:null,turnSeq:0,pendingUno:null
   });
 
   switchScreen('lobby');
@@ -1235,6 +1810,7 @@ function hostOnAction(msg){
       if(!G.isHost)return;
       const i=Host.players.findIndex(p=>p.pid===msg.pid);
       if(i<0)return;
+      if(Host.pendingUnoPid===msg.pid)hostClearUnoCheck();
       if(Host.started&&!Host.winner){
         hostEvent(`${Host.players[i].name} 离开了游戏（托管）`);
         Host.players[i].isBot=true;
@@ -1243,7 +1819,7 @@ function hostOnAction(msg){
       }
       const name=Host.players[i].name;
       Host.players.splice(i,1);
-      if(Host.players.length===0){Host.active=false;hostClearTurnTimer();return}
+      if(Host.players.length===0){Host.active=false;hostClearTurnTimer();hostClearUnoCheck();return}
       if(Host.currentIdx>=Host.players.length)Host.currentIdx=0;
       hostBroadcastLobby();
       hostEvent(`${name} 离开了房间`);
@@ -1254,6 +1830,21 @@ function hostOnAction(msg){
     case 'draw':if(G.isHost)hostHandleDraw(msg.pid);break;
     case 'pass':if(G.isHost)hostHandlePass(msg.pid);break;
     case 'returnLobby':if(G.isHost&&msg.pid===G.pid)hostReturnToLobby();break;
+    case 'shoutUno':{
+      if(!G.isHost)return;
+      if(Host.pendingUnoPid!==msg.pid)return;
+      const p=Host.players.find(x=>x.pid===msg.pid);
+      if(!p)return;
+      if(msg.micPassed){
+        hostClearUnoCheck();
+        Host.lastAction={ts:Date.now(),type:'unoShout',pid:msg.pid};
+        hostEvent(`${p.name}：UNO！`);
+        hostBroadcast();
+      }else{
+        hostPunishUno(msg.pid);
+      }
+      break;
+    }
   }
 }
 function sendAction(obj){
@@ -1278,49 +1869,103 @@ function orderPlayers(){
 }
 
 function renderOpponents(){
-  const wrapEl=$('opponents');wrapEl.innerHTML='';
-  const list=orderPlayers();const pub=G.pub;
-  list.forEach(p=>{
-    const div=document.createElement('div');
+  const wrapEl=$('opponents');
+  const list=orderPlayers();
+  const pub=G.pub;
+  const pidsKey=list.map(p=>p.pid).join(',');
+
+  if(wrapEl.dataset.pids!==pidsKey){
+    wrapEl.innerHTML='';
+    list.forEach(p=>{
+      const div=document.createElement('div');
+      div.className='opponent';
+      div.setAttribute('data-pid',p.pid);
+      div.innerHTML='<div class="opp-name"></div><div class="opp-cards"></div><div class="opp-count"></div>';
+      wrapEl.appendChild(div);
+    });
+    wrapEl.dataset.pids=pidsKey;
+  }
+
+  list.forEach((p,i)=>{
+    const div=wrapEl.children[i];
+    if(!div)return;
     const isActive=pub.currentPid===p.pid&&!pub.winner;
-    div.className='opponent'+(isActive?' active':'')+(p.out?' out':'');
-    div.setAttribute('data-pid',p.pid);
-    let countText,countCls='';
-    if(p.out){countText='出局';countCls=' out'}
-    else if(p.count===1){countText='UNO!';countCls=' uno'}
-    else{countText=p.count+' 张';if(pub.mercyMode&&p.count>=20)countCls=' warn'}
-    div.innerHTML=`<div class="opp-name">${escapeHtml(p.name)}</div><div class="opp-cards"></div><div class="opp-count${countCls}">${countText}</div>`;
-    if(!p.out){
-      const cardsEl=div.querySelector('.opp-cards');
-      const show=Math.min(p.count,9);
-      for(let j=0;j<show;j++){const m=document.createElement('div');m.className='mini-back';cardsEl.appendChild(m)}
+    div.classList.toggle('active',isActive);
+    div.classList.toggle('out',!!p.out);
+
+    const nameEl=div.querySelector('.opp-name');
+    if(nameEl.textContent!==p.name)nameEl.textContent=p.name;
+
+    const cardsEl=div.querySelector('.opp-cards');
+    const show=p.out?0:Math.min(p.count,9);
+    if(cardsEl.dataset.show!==String(show)){
+      cardsEl.innerHTML='';
+      for(let j=0;j<show;j++){
+        const m=document.createElement('div');
+        m.className='mini-back';
+        cardsEl.appendChild(m);
+      }
+      cardsEl.dataset.show=String(show);
     }
-    wrapEl.appendChild(div);
+
+    const countEl=div.querySelector('.opp-count');
+    let countText,countCls;
+    if(p.out){countText='出局';countCls='opp-count out'}
+    else if(p.count===1){countText='UNO!';countCls='opp-count uno'}
+    else{
+      countText=p.count+' 张';
+      countCls='opp-count'+((pub.mercyMode&&p.count>=20)?' warn':'');
+    }
+    if(countEl.textContent!==countText)countEl.textContent=countText;
+    if(countEl.className!==countCls)countEl.className=countCls;
   });
 }
 
 function renderTable(){
-  const drawPile=$('drawPile');drawPile.innerHTML='';
+  const drawPile=$('drawPile');
   const n=Math.min(G.pub.deckCount||0,3);
-  for(let i=0;i<n;i++){const b=createBackEl();const off=(n-1-i)*3;b.style.transform=`translate(${off}px, ${-off}px)`;drawPile.appendChild(b)}
-  $('deckCount').textContent=G.pub.deckCount||0;
-  const discardPile=$('discardPile');discardPile.innerHTML='';
-  if(G.pub.topCard){
-    const el=createCardEl(G.pub.topCard);
-    if(G.pub.topCard.id!==lastTopCardId){
-      lastTopCardId=G.pub.topCard.id;
-      el.classList.add('just-dropped');
+  if(drawPile.dataset.n!==String(n)){
+    drawPile.innerHTML='';
+    for(let i=0;i<n;i++){
+      const b=createBackEl();
+      const off=(n-1-i)*3;
+      b.style.transform=`translate(${off}px, ${-off}px)`;
+      drawPile.appendChild(b);
     }
-    discardPile.appendChild(el);
+    drawPile.dataset.n=String(n);
   }
+  $('deckCount').textContent=G.pub.deckCount||0;
+
+  const discardPile=$('discardPile');
+  const top=G.pub.topCard;
+  const topId=top?top.id:'';
+  if(discardPile.dataset.topId!==topId){
+    discardPile.innerHTML='';
+    if(top){
+      const el=createCardEl(top);
+      if(topId!==lastTopCardId){
+        lastTopCardId=topId;
+        el.classList.add('just-dropped');
+      }
+      discardPile.appendChild(el);
+    }
+    discardPile.dataset.topId=topId;
+  }
+
   const dot=$('colorDot');
-  if(G.pub.currentColor){dot.style.background=`var(--${G.pub.currentColor})`;dot.style.boxShadow=`0 0 10px var(--${G.pub.currentColor})`}
+  const c=G.pub.currentColor;
+  if(c&&dot.dataset.color!==c){
+    dot.style.background=`var(--${c})`;
+    dot.style.boxShadow=`0 0 10px var(--${c})`;
+    dot.dataset.color=c;
+  }
 }
 
 function clientCanPlay(card){
   const pub=G.pub;
   if(!pub||!pub.started||pub.winner)return false;
   if(pub.currentPid!==G.pid)return false;
+  if(G.localPlayLock)return false;
   const me=pub.players.find(p=>p.pid===G.pid);
   if(me&&me.out)return false;
   if(card.color==='wild')return true;
@@ -1331,7 +1976,7 @@ function clientCanPlay(card){
 }
 
 function renderHand(){
-  const el=$('hand');el.innerHTML='';
+  const el=$('hand');
   const hand=G.myHand||[];
   if(G.selectedId){
     const still=hand.find(c=>c.id===G.selectedId);
@@ -1342,19 +1987,35 @@ function renderHand(){
   const stagger=_staggerHand;
   if(stagger)_staggerHand=false;
 
-  hand.forEach((card,i)=>{
-    const c=createCardEl(card);
-    const canPlay=clientCanPlay(card);
-    if(canPlay)c.classList.add('playable');
-    if(G.selectedId===card.id)c.classList.add('selected');
-    if(newCardId===card.id)c.classList.add('newly-drawn');
-    if(stagger){
-      c.classList.add('stagger-in');
-      c.style.animationDelay=(i*55)+'ms';
-    }
-    c.addEventListener('click',()=>onCardClick(card));
-    el.appendChild(c);
-  });
+  const ids=hand.map(c=>c.id).join(',');
+  const needRebuild=ids!==_lastHandIds||stagger;
+
+  if(needRebuild){
+    el.innerHTML='';
+    hand.forEach((card,i)=>{
+      const c=createCardEl(card);
+      const canPlay=clientCanPlay(card);
+      if(canPlay)c.classList.add('playable');
+      if(G.selectedId===card.id)c.classList.add('selected');
+      if(newCardId===card.id)c.classList.add('newly-drawn');
+      if(stagger){
+        c.classList.add('stagger-in');
+        c.style.animationDelay=(i*55)+'ms';
+      }
+      c.addEventListener('click',()=>onCardClick(card));
+      el.appendChild(c);
+    });
+    _lastHandIds=ids;
+  }else{
+    Array.from(el.children).forEach((cEl,i)=>{
+      const card=hand[i];
+      if(!card)return;
+      const canPlay=clientCanPlay(card);
+      cEl.classList.toggle('playable',canPlay);
+      cEl.classList.toggle('selected',G.selectedId===card.id);
+    });
+  }
+
   lastHandCount=hand.length;
   const me=G.pub&&G.pub.players.find(p=>p.pid===G.pid);
   $('outHint').classList.toggle('hidden',!(me&&me.out&&!G.pub.winner));
@@ -1368,27 +2029,32 @@ function renderStatus(){
   if(pub.winner){st.textContent='游戏结束';passBtn.classList.add('hidden');return}
   const me=pub.players.find(p=>p.pid===G.pid);
   if(me&&me.out){st.textContent='已出局 · 观战';passBtn.classList.add('hidden');return}
-  if(pub.currentPid===G.pid){
+  let txt;
+  if(pub.pendingUno&&pub.pendingUno.pid===G.pid){
+    txt='⚡ 快喊 UNO！';
+  }else if(G.localPlayLock&&pub.currentPid===G.pid){
+    txt='出牌中…';
+  }else if(pub.currentPid===G.pid){
     if(G.selectedId){
       const c=G.myHand.find(x=>x.id===G.selectedId);
-      if(c)st.textContent='已选：'+cardDesc(c);
-      else st.textContent='轮到你出牌';
+      txt=c?'已选：'+cardDesc(c):'轮到你出牌';
     }else{
-      st.textContent=pub.drawnPid===G.pid?'出牌或过牌':'轮到你出牌';
+      txt=pub.drawnPid===G.pid?'出牌或过牌':'轮到你出牌';
     }
   }else{
     const cur=pub.players.find(p=>p.pid===pub.currentPid);
-    st.textContent=cur?`${cur.name} 思考中…`:'';
+    txt=cur?`${cur.name} 思考中…`:'';
   }
-  const showPass=pub.currentPid===G.pid&&pub.drawnPid===G.pid&&!pub.winner;
+  if(st.textContent!==txt)st.textContent=txt;
+  const showPass=pub.currentPid===G.pid&&pub.drawnPid===G.pid&&!pub.winner&&!G.localPlayLock;
   passBtn.classList.toggle('hidden',!showPass);
 }
 
 function updatePlayBtn(){
   const btn=$('playBtn');if(!btn)return;
   const pub=G.pub;
-  const can=!!G.selectedId&&pub&&pub.started&&!pub.winner&&pub.currentPid===G.pid;
-  btn.disabled=!can;
+  const can=!!G.selectedId&&pub&&pub.started&&!pub.winner&&pub.currentPid===G.pid&&!G.localPlayLock;
+  if(btn.disabled===can)btn.disabled=!can;
 }
 
 function getBaseCardSize(){return window.innerWidth<=520?{w:56,h:84}:{w:66,h:99}}
@@ -1428,6 +2094,7 @@ function onCardClick(card){
   initAudio();
   const pub=G.pub;
   if(!pub||!pub.started||pub.winner)return;
+  if(G.localPlayLock){toast('出牌中，请稍候…');return}
   if(pub.currentPid!==G.pid){toast('还没轮到你');return}
   if(!clientCanPlay(card)){toast('这张牌不能出');SFX.click();return}
   SFX.click();
@@ -1440,15 +2107,17 @@ function onPlayBtnClick(){
   initAudio();
   const pub=G.pub;
   if(!pub||!pub.started||pub.winner)return;
+  if(G.localPlayLock)return;
   if(pub.currentPid!==G.pid){toast('还没轮到你');return}
   if(!G.selectedId){toast('请先选择一张牌');return}
   const card=G.myHand.find(c=>c.id===G.selectedId);
   if(!card){G.selectedId=null;renderHand();renderStatus();return}
   if(!clientCanPlay(card)){toast('这张牌不能出');G.selectedId=null;renderHand();renderStatus();return}
   SFX.pop();
+  setLocalPlayLock();
   const cid=card.id;
   G.selectedId=null;
-  renderHand();
+  renderHand();renderStatus();
   if(card.color==='wild')showColorPicker(color=>sendAction({type:'play',pid:G.pid,cardId:cid,color}));
   else sendAction({type:'play',pid:G.pid,cardId:cid,color:null});
 }
@@ -1458,6 +2127,7 @@ $('drawPile').addEventListener('click',()=>{
   initAudio();
   const pub=G.pub;
   if(!pub||!pub.started||pub.winner)return;
+  if(G.localPlayLock)return;
   if(pub.currentPid!==G.pid){toast('还没轮到你');return}
   if(pub.drawnPid===G.pid){toast('本回合已经摸过牌了');return}
   SFX.click();
@@ -1470,8 +2140,10 @@ $('passBtn').addEventListener('click',()=>{
   const pub=G.pub;
   if(!pub||pub.currentPid!==G.pid)return;
   if(pub.drawnPid!==G.pid)return;
+  if(G.localPlayLock)return;
   SFX.click();
   G.selectedId=null;
+  setLocalPlayLock();
   renderHand();
   sendAction({type:'pass',pid:G.pid});
 });
