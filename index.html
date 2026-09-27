@@ -1663,13 +1663,16 @@ function hostHandlePlay(pid,cardId,color){
     hostEvent(dAllMsg);
   }
 
-  hostBroadcast();
-
+  // ★ 关键修复：先设置 pendingUno 状态，再广播
   if(unoTriggered){
-    /* 缓存 skip，等 UNO 检查结束后再推进 */
     Host.pendingAdvanceSkip=skip;
     hostStartUnoCheck(cur.pid);
-  }else{
+  }
+
+  hostBroadcast();   // ← 现在广播时已经带上 pendingUno
+
+  // AI 或非触发 UNO 的情况才立即推进
+  if(!unoTriggered){
     setTimeout(()=>hostAdvance(skip),customDelay);
   }
 }
