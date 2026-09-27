@@ -527,7 +527,7 @@ body.shake-red{animation:screenShakeRed .6s ease}
 const COLORS=['red','yellow','green','blue'];
 const COLOR_NAME={red:'红',yellow:'黄',green:'绿',blue:'蓝'};
 const BROKER='wss://broker.emqx.io:8084/mqtt';
-const PREFIX='uno/v11/';
+const PREFIX='uno/v12/';
 const BOT_NAMES=['小蓝','小绿','小黄'];
 const MERCY_LIMIT=25;
 const MERCY_VALUES=['wild6','wild10','reverse_draw4','skip_everyone','discard_all'];
@@ -535,7 +535,7 @@ const TURN_TIME_MS=30000;
 const UNO_WINDOW_MS=5000;
 const UNO_MIC_THRESHOLD=95;
 const UNO_MIC_PEAK_THRESHOLD=150;
-const UNO_MIC_CHECK_MS=4000;   // 语音识别等待时间
+const UNO_MIC_CHECK_MS=4000;
 const UNO_SPEECH_KEYWORDS=/uno|乌诺|优诺|尤诺|优no|尤no|you\s*no|u\s*no|优咯|优若|乌no/i;
 
 const G={
@@ -557,7 +557,8 @@ const Host={
   turnSeq:0,
   pendingUnoPid:null,
   pendingUnoDeadline:0,
-  pendingUnoTimer:null
+  pendingUnoTimer:null,
+  pendingAdvanceSkip:null    /* 新增：UNO 检查期间缓存的推进步数 */
 };
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -747,6 +748,7 @@ $('createBtn').addEventListener('click',async()=>{
   Host.players=[{pid:G.pid,name:G.name,hand:[],isBot:false,out:false}];
   Host.started=false;Host.winner=null;Host.mercyMode=false;Host.lastAction=null;
   Host.turnStartedAt=0;Host.turnTimer=null;Host.turnSeq=0;
+  Host.pendingAdvanceSkip=null;
   hostClearUnoCheck();
   resetTransitionFlags();
   subscribeAsHost();enterLobby();hostBroadcastLobby();
@@ -849,6 +851,7 @@ function leaveRoom(){
   G._unoShouting=false;
   Host.active=false;Host.players=[];Host.started=false;Host.winner=null;Host.lastAction=null;
   Host.turnStartedAt=0;Host.turnTimer=null;Host.turnSeq=0;
+  Host.pendingAdvanceSkip=null;
   hostClearUnoCheck();
   resetTransitionFlags();
   resetRenderCaches();
@@ -972,7 +975,6 @@ function renderUnoOverlay(){
     if(_unoDisplayState==='showing'){
       el.classList.add('hidden');
       _unoDisplayState='hidden';
-      // 停止任何正在进行的语音识别
       if(G._unoAbort){try{G._unoAbort()}catch(e){}}
     }
     return;
@@ -1014,7 +1016,7 @@ setInterval(()=>{
   if(hint&&!hint.dataset.locked)hint.textContent=sec>0?`${sec} 秒内喊出来！`:'太晚了…';
 },100);
 
-/* ============ 语音识别（Speech-to-Text） ============ */
+/* ============ 语音识别 ============ */
 function getSpeechRecognition(){
   return window.SpeechRecognition || window.webkitSpeechRecognition || null;
 }
@@ -1054,11 +1056,8 @@ function runSpeechRecognition(){
     };
 
     const tryStart=()=>{
-      try{
-        recognition=new SR();
-      }catch(e){
-        return finish({passed:false,reason:'初始化失败',heard:''});
-      }
+      try{recognition=new SR()}
+      catch(e){return finish({passed:false,reason:'初始化失败',heard:''})}
       recognition.lang='zh-CN';
       recognition.continuous=true;
       recognition.interimResults=true;
@@ -1091,7 +1090,6 @@ function runSpeechRecognition(){
         if(e.error==='audio-capture'){
           return finish({passed:false,reason:'未找到麦克风设备',heard:heardText});
         }
-        // no-speech / network / aborted 等：继续等
       };
 
       recognition.onend=()=>{
@@ -1103,15 +1101,11 @@ function runSpeechRecognition(){
             heard:heardText
           });
         }
-        // 重新启动（浏览器可能自动结束）
         try{recognition.start()}catch(e){}
       };
 
       try{recognition.start()}
-      catch(e){
-        console.warn('[SR start]',e);
-        return finish({passed:false,reason:'启动识别失败',heard:''});
-      }
+      catch(e){return finish({passed:false,reason:'启动识别失败',heard:''})}
     };
 
     timer=setTimeout(()=>{
@@ -1196,12 +1190,8 @@ async function attemptUnoShout(){
 
   if(hasSR){
     $('unoMicHint').textContent='使用语音识别判定…';
-    try{
-      result=await runSpeechRecognition();
-    }catch(e){
-      console.warn('[SR exc]',e);
-      result={passed:false,reason:'识别出错',heard:''};
-    }
+    try{result=await runSpeechRecognition()}
+    catch(e){console.warn('[SR exc]',e);result={passed:false,reason:'识别出错',heard:''}}
   }else if(hasMic){
     $('unoMicHint').textContent='不支持语音识别，改用音量检测';
     try{
@@ -1463,12 +1453,23 @@ function hostClearUnoCheck(){
 function hostPunishUno(pid){
   const p=Host.players.find(x=>x.pid===pid);
   hostClearUnoCheck();
-  if(!p)return;
-  hostDrawTo(p,2);
-  hostCheckMercyAll();
-  Host.lastAction={ts:Date.now(),type:'unoPenalty',pid};
-  hostEvent(`💥 ${p.name} 没喊 UNO，罚摸 2 张`,true);
-  hostBroadcast();
+  if(p){
+    hostDrawTo(p,2);
+    hostCheckMercyAll();
+    Host.lastAction={ts:Date.now(),type:'unoPenalty',pid};
+    hostEvent(`💥 ${p.name} 没喊 UNO，罚摸 2 张`,true);
+    hostBroadcast();
+  }
+  /* 关键：无论成功还是失败，UNO 检查结束后恢复回合推进 */
+  hostResumeAdvance();
+}
+/* 关键：恢复被 UNO 检查阻塞的回合推进 */
+function hostResumeAdvance(){
+  if(Host.pendingAdvanceSkip===null||Host.pendingAdvanceSkip===undefined)return;
+  const skip=Host.pendingAdvanceSkip;
+  Host.pendingAdvanceSkip=null;
+  if(!Host.started||Host.winner)return;
+  hostAdvance(skip);
 }
 
 function hostStartTurnTimer(){
@@ -1512,6 +1513,7 @@ function hostCheckMercyAll(){
 function hostStartGame(){
   hostClearTurnTimer();
   hostClearUnoCheck();
+  Host.pendingAdvanceSkip=null;
   Host.deck=shuffle(buildDeck(Host.mercyMode));
   Host.discard=[];Host.dir=1;Host.currentIdx=0;Host.winner=null;Host.drawnBy=null;
   for(const p of Host.players){p.hand=[];p.out=false}
@@ -1606,6 +1608,7 @@ function hostHandlePlay(pid,cardId,color){
     Host.lastAction={ts:Date.now(),type:'win',pid:cur.pid};
     hostClearTurnTimer();
     hostClearUnoCheck();
+    Host.pendingAdvanceSkip=null;
     hostBroadcast();
     hostEvent(`🏆 ${cur.name} 获胜！`);
     return;
@@ -1647,19 +1650,28 @@ function hostHandlePlay(pid,cardId,color){
     if(willBeSelf)customDelay=200;
   }
 
+  /* ============ 剩 1 张：暂停回合推进，等待喊 UNO ============ */
+  let unoTriggered=false;
   if(cur.hand.length===1){
     if(cur.isBot){
       hostEvent(`${cur.name}：UNO！`);
       Host.lastAction={ts:Date.now(),type:'unoShout',pid:cur.pid};
     }else{
-      hostStartUnoCheck(cur.pid);
+      unoTriggered=true;
     }
   }else if(dAllMsg){
     hostEvent(dAllMsg);
   }
 
   hostBroadcast();
-  setTimeout(()=>hostAdvance(skip),customDelay);
+
+  if(unoTriggered){
+    /* 缓存 skip，等 UNO 检查结束后再推进 */
+    Host.pendingAdvanceSkip=skip;
+    hostStartUnoCheck(cur.pid);
+  }else{
+    setTimeout(()=>hostAdvance(skip),customDelay);
+  }
 }
 
 function hostHandleDraw(pid){
@@ -1706,10 +1718,13 @@ function hostBestColor(player){
 }
 function hostMaybeBot(){
   if(!Host.started||Host.winner)return;
+  /* UNO 检查期间不让 bot 行动 */
+  if(Host.pendingUnoPid)return;
   const cur=Host.players[Host.currentIdx];
   if(!cur||!cur.isBot||cur.out)return;
   setTimeout(()=>{
     if(!Host.started||Host.winner)return;
+    if(Host.pendingUnoPid)return;
     if(Host.players[Host.currentIdx]!==cur)return;
     hostBotTurn();
   },850);
@@ -1752,6 +1767,7 @@ function hostReturnToLobby(){
   if(!G.isHost||!G.room)return;
   hostClearTurnTimer();
   hostClearUnoCheck();
+  Host.pendingAdvanceSkip=null;
   clearLocalPlayLock();
   Host.started=false;
   Host.winner=null;
@@ -1810,7 +1826,11 @@ function hostOnAction(msg){
       if(!G.isHost)return;
       const i=Host.players.findIndex(p=>p.pid===msg.pid);
       if(i<0)return;
-      if(Host.pendingUnoPid===msg.pid)hostClearUnoCheck();
+      /* 如果离开的是正在喊 UNO 的玩家，清空并恢复推进 */
+      if(Host.pendingUnoPid===msg.pid){
+        hostClearUnoCheck();
+        Host.pendingAdvanceSkip=null;
+      }
       if(Host.started&&!Host.winner){
         hostEvent(`${Host.players[i].name} 离开了游戏（托管）`);
         Host.players[i].isBot=true;
@@ -1819,7 +1839,7 @@ function hostOnAction(msg){
       }
       const name=Host.players[i].name;
       Host.players.splice(i,1);
-      if(Host.players.length===0){Host.active=false;hostClearTurnTimer();hostClearUnoCheck();return}
+      if(Host.players.length===0){Host.active=false;hostClearTurnTimer();hostClearUnoCheck();Host.pendingAdvanceSkip=null;return}
       if(Host.currentIdx>=Host.players.length)Host.currentIdx=0;
       hostBroadcastLobby();
       hostEvent(`${name} 离开了房间`);
@@ -1840,6 +1860,8 @@ function hostOnAction(msg){
         Host.lastAction={ts:Date.now(),type:'unoShout',pid:msg.pid};
         hostEvent(`${p.name}：UNO！`);
         hostBroadcast();
+        /* 关键：喊成功也恢复推进 */
+        hostResumeAdvance();
       }else{
         hostPunishUno(msg.pid);
       }
@@ -1964,6 +1986,8 @@ function renderTable(){
 function clientCanPlay(card){
   const pub=G.pub;
   if(!pub||!pub.started||pub.winner)return false;
+  /* UNO 检查期间不可出牌 */
+  if(pub.pendingUno)return false;
   if(pub.currentPid!==G.pid)return false;
   if(G.localPlayLock)return false;
   const me=pub.players.find(p=>p.pid===G.pid);
@@ -2032,6 +2056,9 @@ function renderStatus(){
   let txt;
   if(pub.pendingUno&&pub.pendingUno.pid===G.pid){
     txt='⚡ 快喊 UNO！';
+  }else if(pub.pendingUno){
+    const u=pub.players.find(p=>p.pid===pub.pendingUno.pid);
+    txt=u?`${u.name} 正在喊 UNO…`:'等待喊 UNO…';
   }else if(G.localPlayLock&&pub.currentPid===G.pid){
     txt='出牌中…';
   }else if(pub.currentPid===G.pid){
@@ -2046,14 +2073,14 @@ function renderStatus(){
     txt=cur?`${cur.name} 思考中…`:'';
   }
   if(st.textContent!==txt)st.textContent=txt;
-  const showPass=pub.currentPid===G.pid&&pub.drawnPid===G.pid&&!pub.winner&&!G.localPlayLock;
+  const showPass=pub.currentPid===G.pid&&pub.drawnPid===G.pid&&!pub.winner&&!G.localPlayLock&&!pub.pendingUno;
   passBtn.classList.toggle('hidden',!showPass);
 }
 
 function updatePlayBtn(){
   const btn=$('playBtn');if(!btn)return;
   const pub=G.pub;
-  const can=!!G.selectedId&&pub&&pub.started&&!pub.winner&&pub.currentPid===G.pid&&!G.localPlayLock;
+  const can=!!G.selectedId&&pub&&pub.started&&!pub.winner&&pub.currentPid===G.pid&&!G.localPlayLock&&!pub.pendingUno;
   if(btn.disabled===can)btn.disabled=!can;
 }
 
@@ -2094,6 +2121,7 @@ function onCardClick(card){
   initAudio();
   const pub=G.pub;
   if(!pub||!pub.started||pub.winner)return;
+  if(pub.pendingUno){toast('等待喊 UNO 完成…');return}
   if(G.localPlayLock){toast('出牌中，请稍候…');return}
   if(pub.currentPid!==G.pid){toast('还没轮到你');return}
   if(!clientCanPlay(card)){toast('这张牌不能出');SFX.click();return}
@@ -2107,6 +2135,7 @@ function onPlayBtnClick(){
   initAudio();
   const pub=G.pub;
   if(!pub||!pub.started||pub.winner)return;
+  if(pub.pendingUno)return;
   if(G.localPlayLock)return;
   if(pub.currentPid!==G.pid){toast('还没轮到你');return}
   if(!G.selectedId){toast('请先选择一张牌');return}
@@ -2127,6 +2156,7 @@ $('drawPile').addEventListener('click',()=>{
   initAudio();
   const pub=G.pub;
   if(!pub||!pub.started||pub.winner)return;
+  if(pub.pendingUno)return;
   if(G.localPlayLock)return;
   if(pub.currentPid!==G.pid){toast('还没轮到你');return}
   if(pub.drawnPid===G.pid){toast('本回合已经摸过牌了');return}
@@ -2141,6 +2171,7 @@ $('passBtn').addEventListener('click',()=>{
   if(!pub||pub.currentPid!==G.pid)return;
   if(pub.drawnPid!==G.pid)return;
   if(G.localPlayLock)return;
+  if(pub.pendingUno)return;
   SFX.click();
   G.selectedId=null;
   setLocalPlayLock();
